@@ -12302,21 +12302,26 @@ $(function () {
         columns.forEach(function (d) {
             if (d.type === 'chart') {
                 var values = [];
-                data.forEach(function(row) {
-                    row.forEach(function(cell) {
+                data.forEach(function (row) {
+                    row.forEach(function (cell) {
                         if (cell.key === d.key) {
                             values.push(cell.value);
                         }
                     });
                 });
+
                 d.chart = d.chart || {};
                 d.chart.width = 300;
 
                 d.chart.x = d3.scale.linear()
                     .range([0, d.chart.width]);
 
-                d.chart.maxX = d3.max(values, function (v) { return v; });
-                d.chart.minX = d3.min(values, function (v) { return v; });
+                d.chart.maxX = d3.max(values, function (v) {
+                    return v;
+                });
+                d.chart.minX = d3.min(values, function (v) {
+                    return v;
+                });
                 d.chart.minX = (d.chart.minX === d.chart.maxX) ? (-1 * d.chart.maxX) : d.chart.minX;
 
                 d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#efe3be", "#c6e3bb", "#a3d393", "#64bc52"];
@@ -12449,8 +12454,6 @@ $(function () {
                 var x = dd.config.chart.x;
                 var color = dd.config.chart.color;
                 var width = dd.config.chart.width;
-
-                console.log(dd);
 
                 $$.select('svg').remove(); // TODO: work on transition (super nice to have though)
 
@@ -12589,6 +12592,13 @@ $(function () {
             'previous': 565.00,
             'per_change': -0.0581,
             'chart_change': -0.0581
+        });
+        d3c.addRow({
+            'name': 'Pigs',
+            'latest': 101,
+            'previous': 100,
+            'per_change': 0.01,
+            'chart_change': 0.01
         });
     }, 3500);
 
