@@ -12334,6 +12334,14 @@ $(function () {
         });
     };
 
+    Table.prototype.sortData = function(key, dir) {
+        var data = this.data;
+        data.sort(sortByKey(key, dir));
+
+        console.log(data);
+        this.redraw();
+    };
+
     Table.prototype.redrawHeader = function () {
         var columns = this.columns();
 
@@ -12534,6 +12542,23 @@ $(function () {
 
     }
 
+    function sortByKey(key, dir) {
+        return function(a, b) {
+            console.log(a);
+            aIndex = a.map(function(obj, index) {
+                if(obj.key == key) {
+                    return index;
+                }
+            }).filter(isFinite);
+            bIndex = b.map(function(obj, index) {
+                if(obj.key == key) {
+                    return index;
+                }
+            }).filter(isFinite);
+            return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
+        }
+    }
+
     Table.prototype.redraw = function () {
         this.redrawHeader();
         this.redrawRows();
@@ -12614,6 +12639,10 @@ $(function () {
             'chart_change': -0.01
         });
     }, 3500);
+
+    setTimeout(function () {
+        d3c.sortData('chart_change', 'asc');
+    }, 7000);
 
     window.addEventListener('resize', function(event){
         d3c.redraw();
