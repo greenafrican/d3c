@@ -12315,9 +12315,15 @@ $(function () {
                 d.chart = d.chart || {};
                 d.chart.width = Math.floor(tableWidth * widthRatio);
                 d.chart.x = d3.scale.linear().range([0, d.chart.width]);
+
                 d.chart.maxX = d3.max(values, function (v) { return v; });
                 d.chart.minX = d3.min(values, function (v) { return v; });
                 d.chart.minX = (d.chart.minX === d.chart.maxX) ? (-1 * d.chart.maxX) : d.chart.minX;
+                d.chart.maxX = (Math.abs(d.chart.maxX) > Math.abs(d.chart.minX)) ?
+                    d.chart.maxX : Math.abs(d.chart.minX);
+                d.chart.minX = (Math.abs(d.chart.minX) > Math.abs(d.chart.maxX)) ?
+                    d.chart.minX : (-1 * d.chart.maxX);
+
                 d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#efe3be", "#c6e3bb", "#a3d393", "#64bc52"];
                 d.chart.color = d3.scale.quantize()
                     .domain([d.chart.minX, 0, d.chart.maxX])
