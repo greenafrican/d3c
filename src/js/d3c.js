@@ -12238,20 +12238,43 @@ $( function() {
 
     Table.prototype.addRow = function(row) {
 
+
+
+        row = this.bindColumnConfig(row);
+
+        this.data.push(row);
+        console.log(this.data);
+        this.redraw();
+
+    };
+
+    Table.prototype.bindColumnConfig = function(row) {
+        var columns = this.columns;
+
+        // Bind column config to each cell and check that column definition and row definition match
         var count = 0;
         for (var k in row) {
             if (row.hasOwnProperty(k)) {
                 ++count;
             }
         }
-        if (count !== this.columns.length) {
-            alert("Row data structure doesn't match column definition"); // TODO: handle mismatch
-            return;
+        if (count !== columns.length) {
+            alert("Row data length doesn't match number of columns"); // TODO: handle mismatch
+            return row;
         }
 
-        this.data.push(row);
-        this.redraw();
+        for (var key in row) {
+            var columnConfig = $.grep(columns, function(e){ // Maybe remove $ dependency if possible?
+                return e.key === key;
+            });
+            row[key] = {
+                value: row[key],
+                config: columnConfig[0] || {}
+            };
+            row[key].config['match'] = $.isEmptyObject(columnConfig[0]) ? false : true;
+        }
 
+        return row;
     };
 
     Table.prototype.redraw = function() {
@@ -12304,23 +12327,33 @@ $( function() {
         bindto: "#d3c-table",
         columns: [{
                 title: "Name",
-                width: "15%"
+                key: 'name',
+                width: "15%",
+                type: "text"
             },
             {
                 title: "Latest",
-                width: "15%"
+                key: 'latest',
+                width: "15%",
+                type: "number"
             },
             {
                 title: "Previous",
-                width: "15%"
+                key: 'previous',
+                width: "15%",
+                type: "number"
             },
             {
                 title: "Change",
-                width: "15%"
+                key: 'per_change',
+                width: "15%",
+                type: "percent"
             },
             {
                 title: "Change",
-                width: "40%"
+                key: 'chart_change',
+                width: "40%",
+                type: "chart"
             }]
     });
 
