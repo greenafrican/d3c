@@ -3,9 +3,9 @@ $( function() {
     //var d3c = { version: "0.0.1" };
 
     function Table(config) {
-        this.bindto = (bindto in config) ? config.bindto : "#d3c-table";
-        this.columns = (columns in config) ? config.columns : [];
-        this.data = (data in config) ? config.data : [];
+        this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
+        this.columns = ('columns' in config) ? config.columns : [];
+        this.data = ('data' in config) ? config.data : [];
     }
 
     Table.prototype.add = function(data) {
@@ -24,6 +24,8 @@ $( function() {
             .attr('class', function(d, i) {return 'd3c-th';})
             .text(function(d) {return d.title;});
     };
+
+    
 
     var d3c = new Table({
         bindto: "#d3c-table",

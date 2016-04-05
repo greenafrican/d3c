@@ -12231,9 +12231,9 @@ $( function() {
     //var d3c = { version: "0.0.1" };
 
     function Table(config) {
-        this.bindto = (bindto in config) ? config.bindto : "#d3c-table";
-        this.columns = (columns in config) ? config.columns : [];
-        this.data = (data in config) ? config.data : [];
+        this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
+        this.columns = ('columns' in config) ? config.columns : [];
+        this.data = ('data' in config) ? config.data : [];
     }
 
     Table.prototype.add = function(data) {
