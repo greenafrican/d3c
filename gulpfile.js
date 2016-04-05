@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var gulp = require('gulp'),
     concat = require('gulp-concat'),
@@ -7,7 +7,7 @@ var gulp = require('gulp'),
     sass = require('gulp-sass'),
     maps = require('gulp-sourcemaps');
 
-gulp.task("concatScripts", function() {
+gulp.task('concatScripts', function() {
     return gulp.src([
             'src/js/moment.js',
             'src/js/calendar.js',
@@ -20,15 +20,15 @@ gulp.task("concatScripts", function() {
         .pipe(gulp.dest('src/js'));
 });
 
-gulp.task("minifyScripts", ["concatScripts"], function() {
-    return gulp.src("src/js/d3c.js")
+gulp.task('minifyScripts', ['concatScripts'], function() {
+    return gulp.src('src/js/d3c.js')
         .pipe(uglify())
         .pipe(rename('d3c.min.js'))
         .pipe(gulp.dest('dist'));
 });
 
 gulp.task('compileSass', function() {
-    return gulp.src("scss/application.scss")
+    return gulp.src('scss/application.scss')
         .pipe(maps.init())
         .pipe(sass())
         .pipe(maps.write('./'))
@@ -39,9 +39,13 @@ gulp.task('watchSass', function() {
     gulp.watch('src/scss/**/*.scss', ['compileSass']);
 });
 
-gulp.task("build", ['minifyScripts', 'compileSass']);
+gulp.task('watchJs', function() {
+    gulp.watch('src/js/**/*.js', ['minifyScripts']);
+});
 
-gulp.task("default", ["build"]);
+gulp.task('build', ['minifyScripts', 'compileSass']);
+
+gulp.task('default', ['build', 'watchJs']);
 
 
 
