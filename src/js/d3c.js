@@ -12254,6 +12254,7 @@ $(function () {
         }
 
         row = this.bindColumnConfig(newRow);
+
         this.data.push(row);
 
         this.redraw();
@@ -12275,6 +12276,7 @@ $(function () {
             }
             this.data = data;
         }
+
         this.redraw();
     };
 
@@ -12294,7 +12296,42 @@ $(function () {
         return row;
     };
 
-    Table.prototype.redrawHeader = function() {
+    Table.prototype.updateColumnStats = function () {
+        var columns = this.columns(), data = this.data;
+
+        columns.forEach(function (d) {
+            if (d.type === 'chart') {
+                var values = [];
+                data.forEach(function(row) {
+                    row.forEach(function(cell) {
+                        if (cell.key === d.key) {
+                            values.push(cell.value);
+                        }
+                    });
+                });
+                d.chart = d.chart || {};
+                d.chart.width = 300;
+
+                d.chart.x = d3.scale.linear()
+                    .range([0, d.chart.width]);
+
+                d.chart.maxX = d3.max(values, function (v) { return v; });
+                d.chart.minX = d3.min(values, function (v) { return v; });
+                d.chart.minX = (d.chart.minX === d.chart.maxX) ? (-1 * d.chart.maxX) : d.chart.minX;
+
+                d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#efe3be", "#c6e3bb", "#a3d393", "#64bc52"];
+
+                d.chart.color = d3.scale.quantize()
+                    .domain([d.chart.minX, 0, d.chart.maxX])
+                    .range(d.chart.colors);
+
+                d.chart.x.domain([d.chart.minX, d.chart.maxX]).nice();
+
+            }
+        });
+    };
+
+    Table.prototype.redrawHeader = function () {
         var columns = this.columns();
 
         var headerRows = this.selectTable.select('thead').selectAll('tr');
@@ -12336,15 +12373,18 @@ $(function () {
         header_cells_in_new_rows.text(function (d) {
             return d.title;
         });
+
+        this.updateColumnStats();
     };
 
-    Table.prototype.redrawRows = function() {
+    Table.prototype.redrawRows = function () {
         var data = this.data;
-        if (data.length > 0) {
 
+        if (data.length > 0) {
             var rows = this.selectTable.select('tbody').selectAll('tr').data(data);
             var cells = rows.selectAll('td').data(function (d) {
                 return $.grep(d, function (e) {
+                    // only include rows that fit the column definitions as per bindColumnConfig()
                     return e.config.match;
                 });
             });
@@ -12359,9 +12399,7 @@ $(function () {
                 .duration(500)
                 .style('opacity', 1.0);
 
-            cells.text(function (d) {
-                return d.value
-            });
+            cells.call(drawCell);
 
             cells.exit()
                 .transition()
@@ -12388,9 +12426,7 @@ $(function () {
                 .duration(500)
                 .style('opacity', 1.0);
 
-            cells_in_new_rows.text(function (d) {
-                return d.value;
-            });
+            cells_in_new_rows.call(drawCell);
 
             rows.exit()
                 .transition()
@@ -12405,6 +12441,83 @@ $(function () {
 
     };
 
+    function drawCell(selection) {
+
+        selection.each(function (dd, i) {
+            var $$ = d3.select(this);
+            if (dd.config.type === 'chart') {
+                var x = dd.config.chart.x;
+                var color = dd.config.chart.color;
+                var width = dd.config.chart.width;
+
+                console.log(dd);
+
+                $$.select('svg').remove(); // TODO: work on transition (super nice to have though)
+
+                var svg = $$.append('svg')
+                    .attr({
+                        "width": width,
+                        "height": 20
+                    });
+                svg.append("rect")
+                    .attr("class", function (d) {
+                        return "bar bar--" + (d.value < 0 ? "negative" : "positive");
+                    })
+                    .attr("x", function (d) {
+                        return x(Math.min(0, d.value));
+                    })
+                    .attr("y", 0)
+                    .attr("width", function (d) {
+                        return Math.abs(x(d.value) - x(0));
+                    })
+                    .attr("height", 20)
+                    .attr("fill", function (d) {
+                        return color(d.value);
+                    });
+                svg.append('text')
+                    .text(d3.format('.1%')(dd.value))
+                    .attr('y', 15)
+                    .attr('x', function (d) {
+                        var posX = x(d.value);
+                        if (posX < x(0)) {
+                            if (posX < (x(0) / 2)) {
+                                return posX + 5;
+                            } else {
+                                return posX - 40;
+                            }
+                        } else {
+                            if (posX > (x(0) + ((width - x(0)) / 2))) {
+                                return x(0) + Math.abs(x(d.value) - x(0)) - 40;
+                            } else {
+                                return x(0) + Math.abs(x(d.value) - x(0));
+                            }
+                        }
+                    })
+                    .attr('class', function (d, i) {
+                        var posX = x(d.value);
+
+                        if (posX < x(0)) {
+                            if (posX < (x(0) / 2)) {
+                                return 'd3c-chart-label-neg-high';
+                            } else {
+                                return 'd3c-chart-label-neg-low';
+                            }
+                        } else {
+                            if (posX > (x(0) + ((width - x(0)) / 2))) {
+                                return 'd3c-chart-label-pos-high';
+                            } else {
+                                return 'd3c-chart-label-pos-low';
+                            }
+                        }
+                    });
+            } else {
+                var ff = ("number" == typeof dd.value) ? d3.format(',0f')(dd.value) : dd.value;
+                $$.text(ff);
+            }
+        });
+
+    }
+
     Table.prototype.redraw = function () {
         this.redrawHeader();
         this.redrawRows();
@@ -12412,12 +12525,13 @@ $(function () {
 
     var d3c = new Table({
         bindto: "#d3c-table",
-        columns: [{
-            title: "Name",
-            key: 'name',
-            width: "15%",
-            type: "text"
-        },
+        columns: [
+            {
+                title: "Name",
+                key: 'name',
+                width: "15%",
+                type: "text"
+            },
             {
                 title: "Latest",
                 key: 'latest',
