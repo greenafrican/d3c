@@ -12232,24 +12232,36 @@ $( function() {
 
     function Table(config) {
         this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
-        this.columns = ('columns' in config) ? config.columns : [];
+        this.columns(('columns' in config) ? config.columns : []);
         this.data = ('data' in config) ? config.data : [];
     }
 
     Table.prototype.addRow = function(row) {
 
-
-
-        row = this.bindColumnConfig(row);
+        //row = this.bindColumnConfig(row);
 
         this.data.push(row);
-        console.log(this.data);
         this.redraw();
 
     };
 
+    Table.prototype.columns = function(columns) {
+        if (arguments.length === 0) return this._columns;
+        columns || (columns = {});
+        this._columns = columns;
+
+        var data = this.data || [];
+        if (data.length === 0) { return this._columns;}
+        else {
+            for (var i = 0; i < data.length; i++) {
+                data[i] = this.bindColumnConfig(row);
+            }
+            this.data = data;
+        }
+    };
+
     Table.prototype.bindColumnConfig = function(row) {
-        var columns = this.columns;
+        var columns = this.columns();
 
         // Bind column config to each cell and check that column definition and row definition match
         var count = 0;
@@ -12280,6 +12292,8 @@ $( function() {
     Table.prototype.redraw = function() {
         var data = this.data;
 
+        console.log(data);
+
         if (data.length > 0) {
 
             this.selectTable = d3.select(this.bindto)
@@ -12289,7 +12303,7 @@ $( function() {
                 .append('thead')
                 .append('tr')
                 .selectAll('th')
-                .data(this.columns).enter()
+                .data(this.columns()).enter()
                 .append('th')
                 .style('width', function (d, i) {
                     return d.width;
@@ -12309,14 +12323,15 @@ $( function() {
                 .append('tr')
                 .selectAll('td')
                 .data(function (d) {
-                    return d3.values(d);
+                    console.log(d);
+                    return d3.values(d.value);
                 })
                 .enter().append('td')
                 .attr('class', function (d, i) {
                     return 'd3c-td';
                 })
                 .text(function (d, i) {
-                    return d;
+                    return d.value;
                 });
         } else {
             alert("Table has no data!"); // TODO: gracefully handle no data
