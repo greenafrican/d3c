@@ -12559,7 +12559,7 @@ $(function () {
     });
 
     d3c.addRow({
-        'name': 'Active Users',
+        'name': 'Donkeys',
         'latest': 2500.00,
         'previous': 14865.00,
         'per_change': 0.0375,
@@ -12584,7 +12584,7 @@ $(function () {
         //]);
 
         d3c.addRow({
-            'name': 'Admin Users',
+            'name': 'Cows',
             'latest': 500.00,
             'previous': 565.00,
             'per_change': -0.0581,
