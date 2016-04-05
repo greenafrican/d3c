@@ -4,9 +4,16 @@ $( function() {
 
     function Table(config) {
         this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
-        this.selectTable = d3.select(this.bindto).append('table');
         this.columns(('columns' in config) ? config.columns : []);
         this.data = ('data' in config) ? config.data : [];
+
+
+        this.selectTable = d3.select(this.bindto).append('table');
+        this.selectTable
+            .append('thead')
+            .append('tr');
+        this.selectTable
+            .append('tbody');
     }
 
     Table.prototype.addRow = function(row) {
@@ -59,14 +66,53 @@ $( function() {
         var data = this.data;
 
         if (data.length > 0) {
+            console.log(this.columns());
 
-            var rows = this.selectTable.selectAll('tr').data(data);
+            var headerRows = this.selectTable.select('thead').selectAll('tr');
+            var headerCells = headerRows.selectAll('th').data(this.columns());
+
+            headerCells.enter().append('th')
+                .style('width', function(d) {
+                    return d.width;
+                })
+                .style('opacity', 0.0)
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style('opacity', 1.0);
+
+            headerCells.text(function(d) {return d.title});
+
+            headerCells.exit()
+                .transition()
+                .delay(200)
+                .duration(500)
+                .style('opacity', 0.0)
+                .remove();
+
+            var header_cells_in_new_rows = headerRows.selectAll('th').data(this.columns());
+
+            header_cells_in_new_rows.enter().append('th')
+                .style('width', function(d) {
+                    return d.width;
+                })
+                .style('opacity', 0.0)
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style('opacity', 1.0);
+
+            header_cells_in_new_rows.text(function(d) { return d.title; });
+
+            var rows = this.selectTable.select('tbody').selectAll('tr').data(data);
             var cells = rows.selectAll('td').data(function(d) {
                 return $.grep(d, function(e){ return e.config.match; });
             });
 
-            // Cells enter selection
             cells.enter().append('td')
+                .style('width', function(d) {
+                    return d.config.width;
+                })
                 .style('opacity', 0.0)
                 .transition()
                 .delay(500)
@@ -75,7 +121,6 @@ $( function() {
 
             cells.text(function(d) {return d.value});
 
-            // Cells exit selection
             cells.exit()
                 .transition()
                 .delay(200)
@@ -90,6 +135,9 @@ $( function() {
                 });
 
             cells_in_new_rows.enter().append('td')
+                .style('width', function(d) {
+                    return d.config.width;
+                })
                 .style('opacity', 0.0)
                 .transition()
                 .delay(500)
