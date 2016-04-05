@@ -12298,6 +12298,7 @@ $(function () {
 
     Table.prototype.updateColumnStats = function () {
         var columns = this.columns(), data = this.data;
+        var tableWidth = this.selectTable.node().getBoundingClientRect().width;
 
         columns.forEach(function (d) {
             if (d.type === 'chart') {
@@ -12309,27 +12310,18 @@ $(function () {
                         }
                     });
                 });
+                var widthRatio = parseFloat(d.width) / 100;
 
                 d.chart = d.chart || {};
-                d.chart.width = 300;
-
-                d.chart.x = d3.scale.linear()
-                    .range([0, d.chart.width]);
-
-                d.chart.maxX = d3.max(values, function (v) {
-                    return v;
-                });
-                d.chart.minX = d3.min(values, function (v) {
-                    return v;
-                });
+                d.chart.width = Math.floor(tableWidth * widthRatio);
+                d.chart.x = d3.scale.linear().range([0, d.chart.width]);
+                d.chart.maxX = d3.max(values, function (v) { return v; });
+                d.chart.minX = d3.min(values, function (v) { return v; });
                 d.chart.minX = (d.chart.minX === d.chart.maxX) ? (-1 * d.chart.maxX) : d.chart.minX;
-
                 d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#efe3be", "#c6e3bb", "#a3d393", "#64bc52"];
-
                 d.chart.color = d3.scale.quantize()
                     .domain([d.chart.minX, 0, d.chart.maxX])
                     .range(d.chart.colors);
-
                 d.chart.x.domain([d.chart.minX, d.chart.maxX]).nice();
 
             }
@@ -12514,8 +12506,23 @@ $(function () {
                         }
                     });
             } else {
-                var ff = ("number" == typeof dd.value) ? d3.format(',0f')(dd.value) : dd.value;
-                $$.text(ff);
+                switch (dd.config.type) {
+                    case 'text':
+                        $$.text(dd.value);
+                        break;
+                    case 'number':
+                        $$.text(d3.format(',0f')(dd.value));
+                        break;
+                    case 'percent':
+                        $$.text(d3.format('.2%')(dd.value));
+                        break;
+                    case 'currency':
+                        $$.text(d3.format('$.2f')(dd.value));
+                        break;
+                    default:
+                        $$.text(dd.value);
+                }
+
             }
         });
 
@@ -12597,10 +12604,14 @@ $(function () {
             'name': 'Pigs',
             'latest': 101,
             'previous': 100,
-            'per_change': 0.01,
-            'chart_change': 0.01
+            'per_change': -0.01,
+            'chart_change': -0.01
         });
     }, 3500);
+
+    window.addEventListener('resize', function(event){
+        d3c.redraw();
+    });
 
 
 });
