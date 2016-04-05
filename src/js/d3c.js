@@ -12232,15 +12232,23 @@ $( function() {
 
     function Table(config) {
         this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
+        this.selectTable = d3.select(this.bindto).append('table');
         this.columns(('columns' in config) ? config.columns : []);
         this.data = ('data' in config) ? config.data : [];
     }
 
     Table.prototype.addRow = function(row) {
+        var newRow = [];
+        for (var k in row) {
+            newRow.push({
+                key: k,
+                value: row[k]
+            });
+        }
 
-        //row = this.bindColumnConfig(row);
-
+        row = this.bindColumnConfig(newRow);
         this.data.push(row);
+
         this.redraw();
 
     };
@@ -12254,37 +12262,23 @@ $( function() {
         if (data.length === 0) { return this._columns;}
         else {
             for (var i = 0; i < data.length; i++) {
-                data[i] = this.bindColumnConfig(row);
+                data[i] = this.bindColumnConfig(data[i]);
             }
             this.data = data;
         }
+        this.redraw();
     };
 
     Table.prototype.bindColumnConfig = function(row) {
         var columns = this.columns();
 
         // Bind column config to each cell and check that column definition and row definition match
-        var count = 0;
-        for (var k in row) {
-            if (row.hasOwnProperty(k)) {
-                ++count;
-            }
-        }
-        if (count !== columns.length) {
-            alert("Row data length doesn't match number of columns"); // TODO: handle mismatch
-            return row;
-        }
 
-        for (var key in row) {
-            var columnConfig = $.grep(columns, function(e){ // Maybe remove $ dependency if possible?
-                return e.key === key;
-            });
-            row[key] = {
-                value: row[key],
-                config: columnConfig[0] || {}
-            };
-            row[key].config['match'] = $.isEmptyObject(columnConfig[0]) ? false : true;
-        }
+        row.forEach(function(r){
+            var columnConfig = $.grep(columns, function(e){ return e.key === r.key;});
+            r.config = columnConfig[0] || {};
+            r.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
+        });
 
         return row;
     };
@@ -12292,47 +12286,58 @@ $( function() {
     Table.prototype.redraw = function() {
         var data = this.data;
 
-        console.log(data);
-
         if (data.length > 0) {
 
-            this.selectTable = d3.select(this.bindto)
-                .append('table');
+            var rows = this.selectTable.selectAll('tr').data(data);
+            var cells = rows.selectAll('td').data(function(d) {
+                return $.grep(d, function(e){ return e.config.match; });
+            });
+            cells.attr('class', 'update');
 
-            this.selectTable
-                .append('thead')
-                .append('tr')
-                .selectAll('th')
-                .data(this.columns()).enter()
-                .append('th')
-                .style('width', function (d, i) {
-                    return d.width;
-                })
-                .attr('class', function (d) {
-                    return 'd3c-th';
-                })
-                .text(function (d) {
-                    return d.title;
-                });
+            // Cells enter selection
+            cells.enter().append('td')
+                .style('opacity', 0.0)
+                .attr('class', 'enter')
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style('opacity', 1.0);
 
-            this.width = d3.select(this.bindto + " table").node().getBoundingClientRect().width;
+            cells.text(function(d) {return d.value});
 
-            this.selectTable.append('tbody')
-                .selectAll('tr')
-                .data(data).enter()
-                .append('tr')
+            // Cells exit selection
+            cells.exit()
+                .attr('class', 'exit')
+                .transition()
+                .delay(200)
+                .duration(500)
+                .style('opacity', 0.0)
+                .remove();
+
+            var cells_in_new_rows = rows.enter().append('tr')
                 .selectAll('td')
-                .data(function (d) {
-                    console.log(d);
-                    return d3.values(d.value);
-                })
-                .enter().append('td')
-                .attr('class', function (d, i) {
-                    return 'd3c-td';
-                })
-                .text(function (d, i) {
-                    return d.value;
+                .data(function(d) {
+                    return $.grep(d, function(e){ return e.config.match; });
                 });
+
+            cells_in_new_rows.enter().append('td')
+                .style('opacity', 0.0)
+                .attr('class', 'enter')
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style('opacity', 1.0);
+
+            cells_in_new_rows.text(function(d) { return d.value; });
+
+            rows.exit()
+                .attr('class', 'exit')
+                .transition()
+                .delay(200)
+                .duration(500)
+                .style('opacity', 0.0)
+                .remove();
+
         } else {
             alert("Table has no data!"); // TODO: gracefully handle no data
         }
@@ -12379,6 +12384,17 @@ $( function() {
         'per_change': 0.0375,
         'chart_change': 0.0375
     });
+
+    setTimeout(function() {
+        d3c.addRow({
+            'name': 'Admin Users',
+            'latest': 500.00,
+            'previous': 565.00,
+            'per_change': -0.0581,
+            'chart_change': -0.0581
+        });
+    }, 3500);
+
 
 });
 
