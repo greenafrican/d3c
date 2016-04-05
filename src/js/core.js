@@ -64,12 +64,10 @@ $( function() {
             var cells = rows.selectAll('td').data(function(d) {
                 return $.grep(d, function(e){ return e.config.match; });
             });
-            cells.attr('class', 'update');
 
             // Cells enter selection
             cells.enter().append('td')
                 .style('opacity', 0.0)
-                .attr('class', 'enter')
                 .transition()
                 .delay(500)
                 .duration(500)
@@ -79,7 +77,6 @@ $( function() {
 
             // Cells exit selection
             cells.exit()
-                .attr('class', 'exit')
                 .transition()
                 .delay(200)
                 .duration(500)
@@ -94,7 +91,6 @@ $( function() {
 
             cells_in_new_rows.enter().append('td')
                 .style('opacity', 0.0)
-                .attr('class', 'enter')
                 .transition()
                 .delay(500)
                 .duration(500)
@@ -103,7 +99,6 @@ $( function() {
             cells_in_new_rows.text(function(d) { return d.value; });
 
             rows.exit()
-                .attr('class', 'exit')
                 .transition()
                 .delay(200)
                 .duration(500)
