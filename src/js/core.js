@@ -99,12 +99,12 @@ $(function () {
                     d.chart.maxX : Math.abs(d.chart.minX);
                 d.chart.minX = (Math.abs(d.chart.minX) > Math.abs(d.chart.maxX)) ?
                     d.chart.minX : (-1 * d.chart.maxX);
-                d.chart.minX = (d.chart.minX >= 0) ? 0 : d.chart.minX;
 
-                d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#efe3be", "#c6e3bb", "#a3d393", "#64bc52"];
+                d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#c6e3bb", "#a3d393", "#64bc52"];
                 d.chart.color = d3.scale.quantize()
                     .domain([d.chart.minX, 0, d.chart.maxX])
                     .range(d.chart.colors);
+                d.chart.minX = (d.chart.minX >= 0) ? 0 : d.chart.minX;
                 d.chart.x.domain([d.chart.minX, d.chart.maxX]).nice();
 
             }
@@ -263,22 +263,7 @@ $(function () {
                     });
                 svg.append('text')
                     .text(function(d) {
-                        switch (d.config.format) {
-                            case 'text':
-                                return d.value;
-                                break;
-                            case 'number':
-                                return d3.format(',0f')(d.value);
-                                break;
-                            case 'percent':
-                                return d3.format('.2%')(d.value);
-                                break;
-                            case 'currency':
-                                return d3.format('$.2f')(d.value);
-                                break;
-                            default:
-                                return d.value;
-                        }
+                        return formatText(d);
                     })
                     .attr('y', 15)
                     .attr('x', function (d) {
@@ -322,46 +307,23 @@ $(function () {
                     .style('background-color', function(d) {
                         return hcolor(d.value)
                     })
+                    .style('text-align', 'center')
                     .text(function(d) {
-                        switch (d.config.format) {
-                            case 'text':
-                                return d.value;
-                                break;
-                            case 'number':
-                                return d3.format(',0f')(d.value);
-                                break;
-                            case 'percent':
-                                return d3.format('.2%')(d.value);
-                                break;
-                            case 'currency':
-                                return d3.format('$.2f')(d.value);
-                                break;
-                            default:
-                                return d.value;
-                        }
+                        return formatText(d);
                     });
             } else {
-                switch (dd.config.format) {
-                    case 'text':
-                        $$.text(dd.value);
-                        break;
-                    case 'number':
-                        $$.text(d3.format(',0f')(dd.value));
-                        break;
-                    case 'percent':
-                        $$.text(d3.format('.2%')(dd.value));
-                        break;
-                    case 'currency':
-                        $$.text(d3.format('$.2f')(dd.value));
-                        break;
-                    default:
-                        $$.text(dd.value);
-                }
-
+                $$.text(function(d) {
+                    return formatText(d);
+                });
             }
         });
 
     }
+
+    Table.prototype.redraw = function () {
+        this.redrawHeader();
+        this.redrawRows();
+    };
 
     function sortByKey(key, dir) {
         return function (a, b) {
@@ -381,10 +343,25 @@ $(function () {
         }
     }
 
-    Table.prototype.redraw = function () {
-        this.redrawHeader();
-        this.redrawRows();
-    };
+    function formatText(d) {
+        switch (d.config.format) {
+            case 'text':
+                return d.value;
+                break;
+            case 'number':
+                return d3.format(',0f')(d.value);
+                break;
+            case 'percent':
+                return d3.format('.2%')(d.value);
+                break;
+            case 'currency':
+                return d3.format('$.2f')(d.value);
+                break;
+            default:
+                return d.value;
+        }
+    }
+
 
     var d3c = new Table({
         bindto: "#d3c-table",
@@ -460,10 +437,10 @@ $(function () {
         });
         d3c.addRow({
             'name': 'Pigs',
-            'latest': 101,
+            'latest': 102,
             'previous': 100,
-            'difference': 1,
-            'chart_change': -0.01
+            'difference': 2,
+            'chart_change': 0.005
         });
     }, 3500);
 
