@@ -12301,7 +12301,7 @@ $(function () {
         var tableWidth = this.selectTable.node().getBoundingClientRect().width;
 
         columns.forEach(function (d) {
-            if (d.type === 'chart') {
+            if (d.type === 'chart' || d.type === 'highlight') {
                 var values = [];
                 data.forEach(function (row) {
                     row.forEach(function (cell) {
@@ -12316,13 +12316,18 @@ $(function () {
                 d.chart.width = Math.floor(tableWidth * widthRatio);
                 d.chart.x = d3.scale.linear().range([0, d.chart.width]);
 
-                d.chart.maxX = d3.max(values, function (v) { return v; });
-                d.chart.minX = d3.min(values, function (v) { return v; });
-                d.chart.minX = (d.chart.minX === d.chart.maxX) ? (-1 * d.chart.maxX) : d.chart.minX;
+                d.chart.maxX = d3.max(values, function (v) {
+                    return v;
+                });
+                d.chart.minX = d3.min(values, function (v) {
+                    return v;
+                });
+                d.chart.minX = (d.chart.minX === d.chart.maxX) ? 0 : d.chart.minX;
                 d.chart.maxX = (Math.abs(d.chart.maxX) > Math.abs(d.chart.minX)) ?
                     d.chart.maxX : Math.abs(d.chart.minX);
                 d.chart.minX = (Math.abs(d.chart.minX) > Math.abs(d.chart.maxX)) ?
                     d.chart.minX : (-1 * d.chart.maxX);
+                d.chart.minX = (d.chart.minX >= 0) ? 0 : d.chart.minX;
 
                 d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#efe3be", "#c6e3bb", "#a3d393", "#64bc52"];
                 d.chart.color = d3.scale.quantize()
@@ -12334,11 +12339,10 @@ $(function () {
         });
     };
 
-    Table.prototype.sortData = function(key, dir) {
+    Table.prototype.sortData = function (key, dir) {
         var data = this.data;
         data.sort(sortByKey(key, dir));
 
-        console.log(data);
         this.redraw();
     };
 
@@ -12476,6 +12480,8 @@ $(function () {
                         return x(Math.min(0, d.value));
                     })
                     .attr("y", 0)
+                    .attr('rx', 3)
+                    .attr('ry', 3)
                     .attr("width", function (d) {
                         return Math.abs(x(d.value) - x(0));
                     })
@@ -12484,7 +12490,24 @@ $(function () {
                         return color(d.value);
                     });
                 svg.append('text')
-                    .text(d3.format('.1%')(dd.value))
+                    .text(function(d) {
+                        switch (d.config.format) {
+                            case 'text':
+                                return d.value;
+                                break;
+                            case 'number':
+                                return d3.format(',0f')(d.value);
+                                break;
+                            case 'percent':
+                                return d3.format('.2%')(d.value);
+                                break;
+                            case 'currency':
+                                return d3.format('$.2f')(d.value);
+                                break;
+                            default:
+                                return d.value;
+                        }
+                    })
                     .attr('y', 15)
                     .attr('x', function (d) {
                         var posX = x(d.value);
@@ -12519,8 +12542,34 @@ $(function () {
                             }
                         }
                     });
+            } else if (dd.config.type === 'highlight') {
+                $$.select('div').remove(); // TODO: work on transition (super nice to have though)
+
+                var hcolor = dd.config.chart.color;
+                $$.append('div')
+                    .style('background-color', function(d) {
+                        return hcolor(d.value)
+                    })
+                    .text(function(d) {
+                        switch (d.config.format) {
+                            case 'text':
+                                return d.value;
+                                break;
+                            case 'number':
+                                return d3.format(',0f')(d.value);
+                                break;
+                            case 'percent':
+                                return d3.format('.2%')(d.value);
+                                break;
+                            case 'currency':
+                                return d3.format('$.2f')(d.value);
+                                break;
+                            default:
+                                return d.value;
+                        }
+                    });
             } else {
-                switch (dd.config.type) {
+                switch (dd.config.format) {
                     case 'text':
                         $$.text(dd.value);
                         break;
@@ -12543,18 +12592,19 @@ $(function () {
     }
 
     function sortByKey(key, dir) {
-        return function(a, b) {
-            console.log(a);
-            aIndex = a.map(function(obj, index) {
-                if(obj.key == key) {
+        return function (a, b) {
+            aIndex = a.map(function (obj, index) {
+                if (obj.key == key) {
                     return index;
                 }
             }).filter(isFinite);
-            bIndex = b.map(function(obj, index) {
-                if(obj.key == key) {
+
+            bIndex = b.map(function (obj, index) {
+                if (obj.key == key) {
                     return index;
                 }
             }).filter(isFinite);
+
             return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
         }
     }
@@ -12571,39 +12621,44 @@ $(function () {
                 title: "Name",
                 key: 'name',
                 width: "15%",
-                type: "text"
+                type: "cell",
+                format: "text"
             },
             {
                 title: "Latest",
                 key: 'latest',
                 width: "15%",
-                type: "number"
+                type: "cell",
+                format: "number"
             },
             {
                 title: "Previous",
                 key: 'previous',
                 width: "15%",
-                type: "number"
+                type: "cell",
+                format: "number"
             },
             {
                 title: "Change",
-                key: 'per_change',
-                width: "15%",
-                type: "percent"
+                key: 'difference',
+                width: "40%",
+                type: "chart",
+                format: "number"
             },
             {
                 title: "Change",
                 key: 'chart_change',
-                width: "40%",
-                type: "chart"
+                width: "15%",
+                type: "highlight",
+                format: "percent"
             }]
     });
 
     d3c.addRow({
         'name': 'Donkeys',
         'latest': 2500.00,
-        'previous': 14865.00,
-        'per_change': 0.0375,
+        'previous': 2465.00,
+        'difference': 35,
         'chart_change': 0.0375
     });
 
@@ -12628,23 +12683,23 @@ $(function () {
             'name': 'Cows',
             'latest': 500.00,
             'previous': 565.00,
-            'per_change': -0.0581,
+            'difference': -65,
             'chart_change': -0.0581
         });
         d3c.addRow({
             'name': 'Pigs',
             'latest': 101,
             'previous': 100,
-            'per_change': -0.01,
+            'difference': 1,
             'chart_change': -0.01
         });
     }, 3500);
 
     setTimeout(function () {
-        d3c.sortData('chart_change', 'asc');
+        d3c.sortData('chart_change', 'desc');
     }, 7000);
 
-    window.addEventListener('resize', function(event){
+    window.addEventListener('resize', function (event) {
         d3c.redraw();
     });
 
