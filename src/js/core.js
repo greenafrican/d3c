@@ -269,12 +269,11 @@ $(function () {
                     .attr('y', 15)
                     .attr('x', function (d) {
                         var posX = (d.config.chart.zeroBased) ? Math.abs(x(d.value)) : x(d.value);
-                        console.log(posX);
                         if (d.config.chart.zeroBased) {
                             if (posX > (width / 2)) {
                                 return x(0) + Math.abs(x(0)) + 8;
                             } else {
-                                return x(0) + Math.abs(x(d.value) - x(0));
+                                return x(0) + Math.abs(x(d.value) - x(0)) + 5;
                             }
                         }
                         if (posX < x(0)) {
@@ -389,7 +388,8 @@ $(function () {
                 type: "chart",
                 format: "number",
                 chart: {
-                    zeroBased: true
+                    zeroBased: true,
+                    color: "chart_change"
                 }
             },
             {
