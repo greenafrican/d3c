@@ -12313,6 +12313,7 @@ $(function () {
                 var widthRatio = parseFloat(d.width) / 100;
 
                 d.chart = d.chart || {};
+                d.chart.zeroBased = d.chart.zeroBased || false;
                 d.chart.width = Math.floor(tableWidth * widthRatio);
                 d.chart.x = d3.scale.linear().range([0, d.chart.width]);
 
@@ -12333,7 +12334,7 @@ $(function () {
                     .domain([d.chart.minX, 0, d.chart.maxX])
                     .range(d.chart.colors);
                 d.chart.minX = (d.chart.minX >= 0) ? 0 : d.chart.minX;
-                d.chart.x.domain([d.chart.minX, d.chart.maxX]).nice();
+                d.chart.x.domain([(d.chart.zeroBased) ? 0 : d.chart.minX, d.chart.maxX]).nice();
 
             }
         });
@@ -12477,13 +12478,13 @@ $(function () {
                         return "bar bar--" + (d.value < 0 ? "negative" : "positive");
                     })
                     .attr("x", function (d) {
-                        return x(Math.min(0, d.value));
+                        return (d.config.chart.zeroBased) ? x(0) : x(Math.min(0, d.value));
                     })
                     .attr("y", 0)
                     .attr('rx', 3)
                     .attr('ry', 3)
                     .attr("width", function (d) {
-                        return Math.abs(x(d.value) - x(0));
+                        return (d.config.chart.zeroBased) ? Math.abs(x(d.value)) : Math.abs(x(d.value) - x(0));
                     })
                     .attr("height", 20)
                     .attr("fill", function (d) {
@@ -12495,7 +12496,15 @@ $(function () {
                     })
                     .attr('y', 15)
                     .attr('x', function (d) {
-                        var posX = x(d.value);
+                        var posX = (d.config.chart.zeroBased) ? Math.abs(x(d.value)) : x(d.value);
+                        console.log(posX);
+                        if (d.config.chart.zeroBased) {
+                            if (posX > (width / 2)) {
+                                return x(0) + Math.abs(x(0)) + 8;
+                            } else {
+                                return x(0) + Math.abs(x(d.value) - x(0));
+                            }
+                        }
                         if (posX < x(0)) {
                             if (posX < (x(0) / 2)) {
                                 return posX + 5;
@@ -12604,22 +12613,18 @@ $(function () {
             {
                 title: "Latest",
                 key: 'latest',
-                width: "15%",
-                type: "cell",
-                format: "number"
+                width: "40%",
+                type: "chart",
+                format: "number",
+                chart: {
+                    zeroBased: true
+                }
             },
             {
                 title: "Previous",
                 key: 'previous',
                 width: "15%",
                 type: "cell",
-                format: "number"
-            },
-            {
-                title: "Change",
-                key: 'difference',
-                width: "40%",
-                type: "chart",
                 format: "number"
             },
             {
