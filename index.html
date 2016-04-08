@@ -5,8 +5,9 @@
 <script type="text/javascript" src="dist/c3.min.js"></script>
 <script type="text/javascript" src="dist/d3c.js"></script>
 <script>
-    $(function () {
-        var d3cTable = d3c.table({
+    var d3cTable;
+    $(document).ready(function () {
+        d3cTable = d3c.table({
             bindto: "#d3c-table",
             columns: [
                 {
