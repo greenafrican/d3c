@@ -68,7 +68,7 @@ Table.prototype.recalculate = function() {
                         }
                     });
                 });
-
+                console.debug(col.chart.values);
                 var widthRatio = parseFloat(col.width) / 100;
 
                 col.chart = col.chart || {};

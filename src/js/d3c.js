@@ -124,7 +124,7 @@ Table.prototype.recalculate = function() {
                         }
                     });
                 });
-
+                console.debug(col.chart.values);
                 var widthRatio = parseFloat(col.width) / 100;
 
                 col.chart = col.chart || {};
@@ -317,8 +317,6 @@ function drawCell(selection) {
                 .attr('rx', 3)
                 .attr('ry', 3)
                 .attr("width", function (d) {
-                    console.log(x(d.value), d.x);
-                    console.log(d);
                     return (d.config.chart.zeroBased) ? Math.abs(x(d.value)) : Math.abs(x(d.value) - x(0));
                 })
                 .attr("height", 20)
