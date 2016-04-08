@@ -25,7 +25,7 @@
                     format: "number",
                     chart: {
                         zeroBased: true,
-                        color: "chart_change"
+                        colorFrom: "chart_change"
                     }
                 },
                 {
@@ -41,15 +41,15 @@
                     width: "15%",
                     type: "highlight",
                     format: "percent"
+                }],
+            data: [
+                {
+                    'name': 'Cows',
+                    'latest': 500.00,
+                    'previous': 565.00,
+                    'difference': -65,
+                    'chart_change': -0.0581
                 }]
-        });
-
-        d3cTable.addRow({
-            'name': 'Donkeys',
-            'latest': 2500.00,
-            'previous': 2465.00,
-            'difference': 35,
-            'chart_change': 0.0375
         });
 
         setTimeout(function () {
@@ -68,14 +68,14 @@
             //        type: "chart"
             //    }
             //]);
-
             d3cTable.addRow({
-                'name': 'Cows',
-                'latest': 500.00,
-                'previous': 565.00,
-                'difference': -65,
-                'chart_change': -0.0581
+                'name': 'Donkeys',
+                'latest': 2500.00,
+                'previous': 2465.00,
+                'difference': 35,
+                'chart_change': 0.0375
             });
+
             d3cTable.addRow({
                 'name': 'Pigs',
                 'latest': 102,

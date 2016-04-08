@@ -2,14 +2,63 @@
     'use strict';
 
 /*global define, module, exports, require */
-var d3c = { version: "0.0.1" };
+function sortByKey(key, dir) {
+    return function (a, b) {
+        var aIndex = a.map(function (obj, index) {
+            if (obj.key == key) {
+                return index;
+            }
+        }).filter(isFinite);
+
+        var bIndex = b.map(function (obj, index) {
+            if (obj.key == key) {
+                return index;
+            }
+        }).filter(isFinite);
+
+        return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
+    }
+}
+
+function formatText(d) {
+    switch (d.config.format) {
+        case 'text':
+            return d.value;
+            break;
+        case 'number':
+            return d3.format(',0f')(d.value);
+            break;
+        case 'percent':
+            return d3.format('.2%')(d.value);
+            break;
+        case 'currency':
+            return d3.format('$.2f')(d.value);
+            break;
+        default:
+            return d.value;
+    }
+}
+
+function pickColor(selection) {
+    var d = d3.select(selection);
+    var c = d3.values(d3.rgb(d.style('background-color'))).slice(0, 3);
+    for (var i = 0; i < c.length; ++i) {
+        c[i] = c[i] / 255;
+        if (c[i] <= 0.03928) {
+            c[i] = c[i] / 12.92
+        } else {
+            c[i] = Math.pow(( c[i] + 0.055 ) / 1.055, 2.4);
+        }
+    }
+    var l = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    //return ( l > 0.179 ) ? 'black' :'white';
+    return ( l > 0.5 ) ? 'black' : 'white';
+}
+var d3c = {version: "0.0.1"};
 
 function Table(config) {
     config = config || {};
     this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
-    this.columns(('columns' in config) ? config.columns : []);
-    this.data = ('data' in config) ? config.data : [];
-
 
     this.selectTable = d3.select(this.bindto).append('table');
     this.selectTable
@@ -17,110 +66,121 @@ function Table(config) {
         .append('tr');
     this.selectTable
         .append('tbody');
+
+    this.data(('data' in config) ? config.data : []);
+    this.columns(('columns' in config) ? config.columns : []);
 }
+
+Table.prototype.data = function (data) {
+    if (arguments.length === 0) return this._data || [];
+    this._data = this._data || [];
+    var self = this;
+
+    data.forEach(function(row) {
+        self.addRow(row);
+    });
+
+    this.redraw();
+};
 
 Table.prototype.addRow = function (row) {
     var newRow = [];
     for (var k in row) {
-        newRow.push({
-            key: k,
-            value: row[k]
-        });
+        if (row.hasOwnProperty(k)) {
+            newRow.push({
+                key: k,
+                value: row[k]
+            });
+        }
     }
 
-    row = this.bindColumnConfig(newRow);
-
-    this.data.push(row);
+    this._data.push(newRow);
 
     this.redraw();
-
 };
 
 Table.prototype.columns = function (columns) {
-    if (arguments.length === 0) return this._columns;
+    if (arguments.length === 0) return this._columns || [];
     columns || (columns = {});
     this._columns = columns;
 
-    var data = this.data || [];
-    if (data.length === 0) {
-        return this._columns;
-    }
-    else {
-        for (var i = 0; i < data.length; i++) {
-            data[i] = this.bindColumnConfig(data[i]);
-        }
-        this.data = data;
-    }
-
     this.redraw();
 };
 
-Table.prototype.bindColumnConfig = function (row) {
-    var columns = this.columns();
+Table.prototype.recalculate = function() {
+    var columns = this.columns(), data = this.data();
+    var tableWidth = ('undefined' === typeof this.selectTable.node()) ? 100 :
+        this.selectTable.node().getBoundingClientRect().width;
 
-    // Bind column config to each cell and check that column definition and row definition match
-
-    row.forEach(function (r) {
-        var columnConfig = $.grep(columns, function (e) {
-            return e.key === r.key;
-        });
-        r.config = columnConfig[0] || {};
-        r.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
-    });
-
-    return row;
-};
-
-Table.prototype.updateColumnStats = function () {
-    var columns = this.columns(), data = this.data;
-    var tableWidth = this.selectTable.node().getBoundingClientRect().width;
-
-    columns.forEach(function (d) {
-        if (d.type === 'chart' || d.type === 'highlight') {
-            var values = [];
-            data.forEach(function (row) {
-                row.forEach(function (cell) {
-                    if (cell.key === d.key) {
-                        values.push(cell.value);
-                    }
+    if (columns.length > 0 && data.length > 0) { // TODO: handle data without column definitions
+        columns.forEach(function(col,i) {
+            if (col.type === 'chart' || col.type === 'highlight') {
+                col.chart = col.chart || {};
+                col.chart.values = [];
+                data.forEach(function (row) {
+                    row.forEach(function (cell) {
+                        if (cell.key === col.key) {
+                            col.chart.values.push(cell.value);
+                        }
+                    });
                 });
+
+                var widthRatio = parseFloat(col.width) / 100;
+
+                col.chart = col.chart || {};
+                col.chart.zeroBased = col.chart.zeroBased || false;
+                col.chart.width = Math.floor(tableWidth * widthRatio);
+                col.chart.x = d3.scale.linear().range([0, col.chart.width]);
+
+                col.chart.maxX = d3.max(col.chart.values, function (v) { return v; });
+                col.chart.minX = d3.min(col.chart.values, function (v) { return v; });
+                col.chart.minX = (col.chart.minX === col.chart.maxX) ? 0 : col.chart.minX;
+                col.chart.maxX = (Math.abs(col.chart.maxX) > Math.abs(col.chart.minX)) ?
+                    col.chart.maxX : Math.abs(col.chart.minX);
+                col.chart.minX = (Math.abs(col.chart.minX) > Math.abs(col.chart.maxX)) ?
+                    col.chart.minX : (-1 * col.chart.maxX);
+
+                col.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#c6e3bb", "#a3d393", "#64bc52"];
+                col.chart.color = d3.scale.quantize()
+                    .domain([col.chart.minX, 0, col.chart.maxX])
+                    .range(col.chart.colors);
+                col.chart.minX = (col.chart.minX >= 0) ? 0 : col.chart.minX;
+                col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
+            }
+        });
+
+        data.forEach(function(row, i) {
+            row.forEach(function(cell, ii) {
+                var columnConfig = $.grep(columns, function (e) {
+                    return e.key === cell.key;
+                });
+                cell.config = columnConfig[0] || {};
+                cell.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
+                if ('chart' in cell.config) {
+                    cell.x = cell.config.chart.x(cell.value) || 0;
+                    cell.color = cell.config.chart.color(cell.value) || '#000';
+                    if ('colorFrom' in cell.config.chart) {
+                        var cellFrom = $.grep(row, function (e) {
+                            return e.key === cell.config.chart.colorFrom;
+                        });
+
+                        cell.color = cellFrom[0].color || cell.color;
+                    }
+                }
             });
-            var widthRatio = parseFloat(d.width) / 100;
 
-            d.chart = d.chart || {};
-            d.chart.zeroBased = d.chart.zeroBased || false;
-            d.chart.width = Math.floor(tableWidth * widthRatio);
-            d.chart.x = d3.scale.linear().range([0, d.chart.width]);
-
-            d.chart.maxX = d3.max(values, function (v) {
-                return v;
-            });
-            d.chart.minX = d3.min(values, function (v) {
-                return v;
-            });
-            d.chart.minX = (d.chart.minX === d.chart.maxX) ? 0 : d.chart.minX;
-            d.chart.maxX = (Math.abs(d.chart.maxX) > Math.abs(d.chart.minX)) ?
-                d.chart.maxX : Math.abs(d.chart.minX);
-            d.chart.minX = (Math.abs(d.chart.minX) > Math.abs(d.chart.maxX)) ?
-                d.chart.minX : (-1 * d.chart.maxX);
-
-            d.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#c6e3bb", "#a3d393", "#64bc52"];
-            d.chart.color = d3.scale.quantize()
-                .domain([d.chart.minX, 0, d.chart.maxX])
-                .range(d.chart.colors);
-            d.chart.minX = (d.chart.minX >= 0) ? 0 : d.chart.minX;
-            d.chart.x.domain([(d.chart.zeroBased) ? 0 : d.chart.minX, d.chart.maxX]).nice();
-
-        }
-    });
+        });
+    }
 };
 
 Table.prototype.sortData = function (key, dir) {
-    var data = this.data;
+    var data = this.data();
     data.sort(sortByKey(key, dir));
-
     this.redraw();
 };
+
+
+
 
 Table.prototype.redrawHeader = function () {
     var columns = this.columns();
@@ -165,11 +225,11 @@ Table.prototype.redrawHeader = function () {
         return d.title;
     });
 
-    this.updateColumnStats();
+    this.recalculate();
 };
 
 Table.prototype.redrawRows = function () {
-    var data = this.data;
+    var data = this.data();
 
     if (data.length > 0) {
         var rows = this.selectTable.select('tbody').selectAll('tr').data(data);
@@ -226,8 +286,6 @@ Table.prototype.redrawRows = function () {
             .style('opacity', 0.0)
             .remove();
 
-    } else {
-        alert("Table has no data!"); // TODO: gracefully handle no data
     }
 
 };
@@ -263,10 +321,11 @@ function drawCell(selection) {
                 })
                 .attr("height", 20)
                 .attr("fill", function (d) {
-                    return color(d.value);
+
+                    return d.color; // color(d.value);
                 });
             svg.append('text')
-                .text(function(d) {
+                .text(function (d) {
                     return formatText(d);
                 })
                 .attr('y', 15)
@@ -312,19 +371,20 @@ function drawCell(selection) {
                 });
         } else if (dd.config.type === 'highlight') {
             $$.select('div').remove(); // TODO: work on transition (super nice to have though)
-
             var hcolor = dd.config.chart.color;
             $$.append('div')
-                .style('background-color', function(d) {
+                .style('background-color', function (d) {
                     return hcolor(d.value)
                 })
                 .style('text-align', 'center')
-                .text(function(d) {
+                .text(function (d) {
                     return formatText(d);
                 })
-                .style('color', function(d) { return pickColor(this);});
+                .style('color', function (d) {
+                    return pickColor(this);
+                });
         } else {
-            $$.text(function(d) {
+            $$.text(function (d) {
                 return formatText(d);
             });
         }
@@ -333,77 +393,26 @@ function drawCell(selection) {
 }
 
 Table.prototype.redraw = function () {
-    this.redrawHeader();
-    this.redrawRows();
+    var columns = this.columns(), data = this.data();
+    if (columns.length > 0 && data.length > 0) {
+        this.recalculate();
+        this.redrawHeader();
+        this.redrawRows();
+    }
 };
-
-function sortByKey(key, dir) {
-    return function (a, b) {
-        var aIndex = a.map(function (obj, index) {
-            if (obj.key == key) {
-                return index;
-            }
-        }).filter(isFinite);
-
-        var bIndex = b.map(function (obj, index) {
-            if (obj.key == key) {
-                return index;
-            }
-        }).filter(isFinite);
-
-        return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
-    }
-}
-
-function formatText(d) {
-    switch (d.config.format) {
-        case 'text':
-            return d.value;
-            break;
-        case 'number':
-            return d3.format(',0f')(d.value);
-            break;
-        case 'percent':
-            return d3.format('.2%')(d.value);
-            break;
-        case 'currency':
-            return d3.format('$.2f')(d.value);
-            break;
-        default:
-            return d.value;
-    }
-}
-
-function pickColor(selection) {
-    var d = d3.select(selection);
-    var c = d3.values(d3.rgb(d.style('background-color'))).slice(0, 3);
-    for ( var i = 0; i < c.length; ++i ) {
-        c[i] = c[i] / 255;
-        if ( c[i] <= 0.03928 ) {
-            c[i] = c[i] / 12.92
-        } else {
-            c[i] = Math.pow( ( c[i] + 0.055 ) / 1.055, 2.4);
-        }
-    }
-    var l = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-    //return ( l > 0.179 ) ? 'black' :'white';
-    return ( l > 0.5 ) ? 'black' :'white';
-}
-
 d3c.table = function (config) {
     return new Table(config);
 };
 
 
-
-
-
-    if (typeof define === 'function' && define.amd) {
-        define("d3c", ["d3"], function () { return d3c; });
-    } else if ('undefined' !== typeof exports && 'undefined' !== typeof module) {
-        module.exports = d3c;
-    } else {
-        window.d3c = d3c;
-    }
+if (typeof define === 'function' && define.amd) {
+    define("d3c", ["d3"], function () {
+        return d3c;
+    });
+} else if ('undefined' !== typeof exports && 'undefined' !== typeof module) {
+    module.exports = d3c;
+} else {
+    window.d3c = d3c;
+}
 
 })(window);

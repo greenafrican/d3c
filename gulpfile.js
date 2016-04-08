@@ -7,10 +7,12 @@ var gulp = require('gulp'),
     sass = require('gulp-sass'),
     maps = require('gulp-sourcemaps');
 
-gulp.task('concatScripts', function() {
+gulp.task('concatScripts', function () {
     return gulp.src([
             'src/js/head.js',
+            'src/js/utils.js',
             'src/js/core.js',
+            'src/js/redraw.js',
             'src/js/tail.js'
         ])
         .pipe(maps.init())
@@ -20,14 +22,14 @@ gulp.task('concatScripts', function() {
         .pipe(gulp.dest('src/js'));
 });
 
-gulp.task('minifyScripts', ['concatScripts'], function() {
+gulp.task('minifyScripts', ['concatScripts'], function () {
     return gulp.src('src/js/d3c.js')
         .pipe(uglify())
         .pipe(rename('d3c.min.js'))
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('compileSass', function() {
+gulp.task('compileSass', function () {
     return gulp.src('scss/application.scss')
         .pipe(maps.init())
         .pipe(sass())
@@ -35,11 +37,11 @@ gulp.task('compileSass', function() {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('watchSass', function() {
+gulp.task('watchSass', function () {
     gulp.watch('src/scss/**/*.scss', ['compileSass']);
 });
 
-gulp.task('watchJs', function() {
+gulp.task('watchJs', function () {
     gulp.watch('src/js/**/*.js', ['minifyScripts']);
 });
 
