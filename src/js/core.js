@@ -64,7 +64,7 @@ Table.prototype.recalculate = function() {
                 data.forEach(function (row) {
                     row.forEach(function (cell) {
                         if (cell.key === col.key) {
-                            col.chart.values.push(cell.value);
+                            col.chart.values.push(+cell.value);
                         }
                     });
                 });
