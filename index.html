@@ -1,7 +1,98 @@
 <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script type="text/javascript" src="dist/moment.js"></script>
+<script type="text/javascript" src="dist/calendar.js"></script>
 <script type="text/javascript" src="dist/d3.min.js"></script>
 <script type="text/javascript" src="dist/c3.min.js"></script>
 <script type="text/javascript" src="dist/d3c.js"></script>
+<script>
+    $(function () {
+        var d3cTable = d3c.table({
+            bindto: "#d3c-table",
+            columns: [
+                {
+                    title: "Name",
+                    key: 'name',
+                    width: "15%",
+                    type: "cell",
+                    format: "text"
+                },
+                {
+                    title: "Latest",
+                    key: 'latest',
+                    width: "40%",
+                    type: "chart",
+                    format: "number",
+                    chart: {
+                        zeroBased: true,
+                        color: "chart_change"
+                    }
+                },
+                {
+                    title: "Previous",
+                    key: 'previous',
+                    width: "15%",
+                    type: "cell",
+                    format: "number"
+                },
+                {
+                    title: "Change",
+                    key: 'chart_change',
+                    width: "15%",
+                    type: "highlight",
+                    format: "percent"
+                }]
+        });
+
+        d3cTable.addRow({
+            'name': 'Donkeys',
+            'latest': 2500.00,
+            'previous': 2465.00,
+            'difference': 35,
+            'chart_change': 0.0375
+        });
+
+        setTimeout(function () {
+
+            //d3c.columns([
+            //    {
+            //        title: "Firstname",
+            //        key: 'name',
+            //        width: "25%",
+            //        type: "text"
+            //    },
+            //    {
+            //        title: "Change",
+            //        key: 'chart_change',
+            //        width: "40%",
+            //        type: "chart"
+            //    }
+            //]);
+
+            d3cTable.addRow({
+                'name': 'Cows',
+                'latest': 500.00,
+                'previous': 565.00,
+                'difference': -65,
+                'chart_change': -0.0581
+            });
+            d3cTable.addRow({
+                'name': 'Pigs',
+                'latest': 102,
+                'previous': 100,
+                'difference': 2,
+                'chart_change': 0.005
+            });
+        }, 3500);
+
+        setTimeout(function () {
+            d3cTable.sortData('chart_change', 'desc');
+        }, 7000);
+
+        window.addEventListener('resize', function (event) {
+            d3cTable.redraw();
+        });
+    });
+</script>
 
 <div class="container">
     <div class="row">
@@ -13,7 +104,7 @@
 
 <style>
     body {
-        font-family: Whitney, "Helvetica Neue", Helvetica, Arial, SansSerif ;
+        font-family: Whitney, "Helvetica Neue", Helvetica, Arial, SansSerif;
     }
 
     .d3c-cell-dev {
@@ -23,9 +114,15 @@
     #d3c-table table {
         width: 100%;
     }
+
     .d3c-chart-label-neg-high,
-    .d3c-chart-label-pos-high {fill: #fff;}
+    .d3c-chart-label-pos-high {
+        fill: #fff;
+    }
+
     .d3c-chart-label-neg-low,
-    .d3c-chart-label-pos-low {fill: #000;}
+    .d3c-chart-label-pos-low {
+        fill: #000;
+    }
 
 </style>

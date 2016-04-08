@@ -9,9 +9,9 @@ var gulp = require('gulp'),
 
 gulp.task('concatScripts', function() {
     return gulp.src([
-            'src/js/moment.js',
-            'src/js/calendar.js',
-            'src/js/core.js'
+            'src/js/head.js',
+            'src/js/core.js',
+            'src/js/tail.js'
         ])
         .pipe(maps.init())
         .pipe(concat('d3c.js'))
