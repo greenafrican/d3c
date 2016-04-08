@@ -317,6 +317,7 @@ function drawCell(selection) {
                 .attr('rx', 3)
                 .attr('ry', 3)
                 .attr("width", function (d) {
+                    console.log(x(d.value), d.x);
                     return (d.config.chart.zeroBased) ? Math.abs(x(d.value)) : Math.abs(x(d.value) - x(0));
                 })
                 .attr("height", 20)
