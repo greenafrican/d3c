@@ -77,7 +77,7 @@ Table.prototype.recalculate = function() {
                 col.chart.x = d3.scale.linear().range([0, col.chart.width]);
 
                 col.chart.maxX = d3.max(col.chart.values, function (v) { return v; });
-                console.debug(col.chart.maxX);
+                console.debug(col);
                 col.chart.minX = d3.min(col.chart.values, function (v) { return v; });
                 col.chart.minX = (col.chart.minX === col.chart.maxX) ? 0 : col.chart.minX;
                 col.chart.maxX = (Math.abs(col.chart.maxX) > Math.abs(col.chart.minX)) ?
