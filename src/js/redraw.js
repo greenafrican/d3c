@@ -18,8 +18,19 @@ Table.prototype.redrawHeader = function () {
         .duration(500)
         .style('opacity', 1.0);
 
-    headerCells.text(function (d) {
-        return d.title
+    headerCells.html(function (d) {
+        var glyph = "";
+        if ('_sort' in self) {
+            if ('key' in self._sort) {
+                if (self._sort.key === d.key) {
+                    if ('direction' in self._sort) {
+                        glyph = (self._sort.direction === "asc") ?
+                            "noticon noticon-uparrow" : "noticon noticon-downarrow"
+                    }
+                }
+            }
+        }
+        return d.title + "<span class='" + glyph + "'></span>";
     });
 
     headerCells.exit()
@@ -41,8 +52,19 @@ Table.prototype.redrawHeader = function () {
         .duration(500)
         .style('opacity', 1.0);
 
-    header_cells_in_new_rows.text(function (d) {
-        return d.title;
+    header_cells_in_new_rows.html(function (d) {
+        var glyph = "";
+        if ('_sort' in self) {
+            if ('key' in self._sort) {
+                if (self._sort.key === d.key) {
+                    if ('direction' in self._sort) {
+                        glyph = (self._sort.direction === "asc") ?
+                            "noticon noticon-uparrow" : "noticon noticon-downarrow"
+                    }
+                }
+            }
+        }
+        return d.title + "<span class='" + glyph + "'></span>";
     });
 
     this.recalculate();
