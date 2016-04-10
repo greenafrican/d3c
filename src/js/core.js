@@ -123,27 +123,5 @@ Table.prototype.recalculate = function() {
     this.sort();
 };
 
-Table.prototype.sort = function (sort) {
-    var data = this.data();
-    if (data.length === 0 && arguments.length === 0) return this._sort || {};
-    if (arguments.length === 0) {
-        sort = this._sort || {};
-        if ('key' in sort) {
-            if ('direction' in sort) {
-                data.sort(sortByKey(sort.key, sort.dir));
-                this._data = data;
-            }
-        }
-    } else {
-        this._sort = {
-            key: ('key' in sort) ? sort.key : "",
-            direction: ('dir' in sort) ? sort.dir : "asc"
-        };
-        this.sort();
-    }
-    this.redraw();
-    return this._sort;
-};
-
 
 

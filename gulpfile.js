@@ -12,6 +12,7 @@ gulp.task('concatScripts', function () {
             'src/js/head.js',
             'src/js/utils.js',
             'src/js/core.js',
+            'src/js/sort.js',
             'src/js/redraw.js',
             'src/js/tail.js'
         ])

@@ -16,7 +16,7 @@ function sortByKey(key, dir) {
             }
         }).filter(isFinite);
 
-        return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
+        return (dir === 'asc') ? (a[aIndex].value < b[bIndex].value) : (a[aIndex].value > b[bIndex].value);
     }
 }
 
@@ -179,6 +179,9 @@ Table.prototype.recalculate = function() {
     this.sort();
 };
 
+
+
+
 Table.prototype.sort = function (sort) {
     var data = this.data();
     if (data.length === 0 && arguments.length === 0) return this._sort || {};
@@ -186,14 +189,14 @@ Table.prototype.sort = function (sort) {
         sort = this._sort || {};
         if ('key' in sort) {
             if ('direction' in sort) {
-                data.sort(sortByKey(sort.key, sort.dir));
+                data.sort(sortByKey(sort.key, sort.direction));
                 this._data = data;
             }
         }
     } else {
         this._sort = {
             key: ('key' in sort) ? sort.key : "",
-            direction: ('dir' in sort) ? sort.dir : "asc"
+            direction: ('direction' in sort) ? sort.direction : "asc"
         };
         this.sort();
     }
@@ -201,16 +204,33 @@ Table.prototype.sort = function (sort) {
     return this._sort;
 };
 
-
-
-
+Table.prototype.sortColumn = function (selection) {
+    var self = this;
+    var key = selection.key || "";
+    var newDirection = "asc";
+    if ('_sort' in self) {
+        if ('key' in self._sort) {
+            if (self._sort.key === key) {
+                if ('direction' in self._sort) {
+                    newDirection = (self._sort.direction === "asc") ? "desc" : "asc"; // toggle sort order
+                }
+            }
+        }
+    }
+    this.sort({key: key, direction: newDirection});
+    this.redraw();
+};
 Table.prototype.redrawHeader = function () {
     var columns = this.columns();
+    var self = this;
 
     var headerRows = this.selectTable.select('thead').selectAll('tr');
     var headerCells = headerRows.selectAll('th').data(columns);
 
     headerCells.enter().append('th')
+        .on('click', function (d) {
+            self.sortColumn(d);
+        })
         .style('width', function (d) {
             return d.width;
         })

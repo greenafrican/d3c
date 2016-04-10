@@ -1,10 +1,14 @@
 Table.prototype.redrawHeader = function () {
     var columns = this.columns();
+    var self = this;
 
     var headerRows = this.selectTable.select('thead').selectAll('tr');
     var headerCells = headerRows.selectAll('th').data(columns);
 
     headerCells.enter().append('th')
+        .on('click', function (d) {
+            self.sortColumn(d);
+        })
         .style('width', function (d) {
             return d.width;
         })

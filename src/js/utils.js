@@ -12,7 +12,7 @@ function sortByKey(key, dir) {
             }
         }).filter(isFinite);
 
-        return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
+        return (dir === 'asc') ? (a[aIndex].value < b[bIndex].value) : (a[aIndex].value > b[bIndex].value);
     }
 }
 
