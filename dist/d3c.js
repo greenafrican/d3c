@@ -434,7 +434,7 @@ function drawCell(selection) {
                         }
                     }
                 })
-                .style('color', function (d) {
+                .style('fill', function (d) {
                     return pickColor(d.color);
                 });
         } else if (dd.config.type === 'highlight') {
