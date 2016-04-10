@@ -247,7 +247,7 @@ Table.prototype.redrawHeader = function () {
                 if (self._sort.key === d.key) {
                     if ('direction' in self._sort) {
                         glyph = (self._sort.direction === "asc") ?
-                            "noticon noticon-uparrow" : "noticon noticon-downarrow"
+                            "noticon noticon-downarrow" : "noticon noticon-uparrow"
                     }
                 }
             }
@@ -281,7 +281,7 @@ Table.prototype.redrawHeader = function () {
                 if (self._sort.key === d.key) {
                     if ('direction' in self._sort) {
                         glyph = (self._sort.direction === "asc") ?
-                            "noticon noticon-uparrow" : "noticon noticon-downarrow"
+                            "noticon noticon-downarrow" : "noticon noticon-uparrow"
                     }
                 }
             }
