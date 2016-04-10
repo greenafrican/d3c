@@ -434,6 +434,9 @@ function drawCell(selection) {
                             return 'd3c-chart-label-pos-low';
                         }
                     }
+                })
+                .style('color', function (d) {
+                    return pickColor(this);
                 });
         } else if (dd.config.type === 'highlight') {
             $$.select('div').remove(); // TODO: work on transition (super nice to have though)
