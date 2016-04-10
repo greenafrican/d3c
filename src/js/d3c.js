@@ -22,7 +22,7 @@ function formatText(d) {
 }
 
 function pickColor(color) {
-    var c = d3.values(d3.rgb()).slice(0, 3);
+    var c = d3.values(d3.rgb(color)).slice(0, 3);
     for (var i = 0; i < c.length; ++i) {
         c[i] = c[i] / 255;
         if (c[i] <= 0.03928) {
