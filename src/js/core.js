@@ -113,13 +113,37 @@ Table.prototype.recalculate = function() {
             });
 
         });
+
+        if (arguments.length === 0) return this._columns || [];
+        columns || (columns = {});
+        this._columns = columns;
     }
+
+    this.sort();
 };
 
-Table.prototype.sortData = function (key, dir) {
+Table.prototype.sort = function (key, dir) {
     var data = this.data();
-    data.sort(sortByKey(key, dir));
+    if (data.length === 0 && arguments.length === 0) return this._sort || {};
+    if (arguments.length === 0) {
+        var sort = this._sort || {};
+        if ('key' in sort) {
+            if ('direction' in sort) {
+                data.sort(sortByKey(sort.key, sort.dir));
+                this._data = data;
+            }
+        }
+    } else {
+        key = key || "";
+        dir = dir || "asc";
+        this._sort = {
+            key: key,
+            direction: dir
+        };
+        this.sort();
+    }
     this.redraw();
+    return this._sort;
 };
 
 
