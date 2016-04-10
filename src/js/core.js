@@ -13,6 +13,7 @@ function Table(config) {
 
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
+    this.sort(('sort' in config) ?  config.sort : {});
 }
 
 Table.prototype.data = function (data) {
@@ -122,11 +123,11 @@ Table.prototype.recalculate = function() {
     this.sort();
 };
 
-Table.prototype.sort = function (key, dir) {
+Table.prototype.sort = function (sort) {
     var data = this.data();
     if (data.length === 0 && arguments.length === 0) return this._sort || {};
     if (arguments.length === 0) {
-        var sort = this._sort || {};
+        sort = this._sort || {};
         if ('key' in sort) {
             if ('direction' in sort) {
                 data.sort(sortByKey(sort.key, sort.dir));
@@ -134,11 +135,9 @@ Table.prototype.sort = function (key, dir) {
             }
         }
     } else {
-        key = key || "";
-        dir = dir || "asc";
         this._sort = {
-            key: key,
-            direction: dir
+            key: ('key' in sort) ? sort.key : "",
+            direction: ('dir' in sort) ? sort.dir : "asc"
         };
         this.sort();
     }
