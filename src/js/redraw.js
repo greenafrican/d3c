@@ -212,7 +212,20 @@ function drawCell(selection) {
                     }
                 })
                 .style('fill', function (d) {
-                    return pickColor(d.color);
+                    var posX = x(d.value);
+                    if (posX < x(0)) {
+                        if (posX < (x(0) / 2)) {
+                            return pickColor(d.color);
+                        } else {
+                            return '#000';
+                        }
+                    } else {
+                        if (posX > (x(0) + ((width - x(0)) / 2))) {
+                            return pickColor(d.color);
+                        } else {
+                            return '#000';
+                        }
+                    }
                 });
         } else if (dd.config.type === 'highlight') {
             $$.select('div').remove(); // TODO: work on transition (super nice to have though)
