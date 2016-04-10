@@ -21,9 +21,8 @@ function formatText(d) {
     }
 }
 
-function pickColor(selection) {
-    var d = d3.select(selection);
-    var c = d3.values(d3.rgb(d.style('background-color'))).slice(0, 3);
+function pickColor(color) {
+    var c = d3.values(d3.rgb()).slice(0, 3);
     for (var i = 0; i < c.length; ++i) {
         c[i] = c[i] / 255;
         if (c[i] <= 0.03928) {
@@ -436,7 +435,7 @@ function drawCell(selection) {
                     }
                 })
                 .style('color', function (d) {
-                    return pickColor(this);
+                    return pickColor(d.color);
                 });
         } else if (dd.config.type === 'highlight') {
             $$.select('div').remove(); // TODO: work on transition (super nice to have though)
@@ -450,7 +449,7 @@ function drawCell(selection) {
                     return formatText(d);
                 })
                 .style('color', function (d) {
-                    return pickColor(this);
+                    return pickColor(d3.select(this).style('background-color'));
                 });
         } else {
             $$.text(function (d) {

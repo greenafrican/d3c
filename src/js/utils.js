@@ -17,9 +17,8 @@ function formatText(d) {
     }
 }
 
-function pickColor(selection) {
-    var d = d3.select(selection);
-    var c = d3.values(d3.rgb(d.style('background-color'))).slice(0, 3);
+function pickColor(color) {
+    var c = d3.values(d3.rgb()).slice(0, 3);
     for (var i = 0; i < c.length; ++i) {
         c[i] = c[i] / 255;
         if (c[i] <= 0.03928) {

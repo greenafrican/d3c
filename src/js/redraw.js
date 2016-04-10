@@ -212,7 +212,7 @@ function drawCell(selection) {
                     }
                 })
                 .style('color', function (d) {
-                    return pickColor(this);
+                    return pickColor(d.color);
                 });
         } else if (dd.config.type === 'highlight') {
             $$.select('div').remove(); // TODO: work on transition (super nice to have though)
@@ -226,7 +226,7 @@ function drawCell(selection) {
                     return formatText(d);
                 })
                 .style('color', function (d) {
-                    return pickColor(this);
+                    return pickColor(d3.select(this).style('background-color'));
                 });
         } else {
             $$.text(function (d) {
