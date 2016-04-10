@@ -1,21 +1,3 @@
-function sortByKey(key, dir) {
-    return function (a, b) {
-        var aIndex = a.map(function (obj, index) {
-            if (obj.key == key) {
-                return index;
-            }
-        }).filter(isFinite);
-
-        var bIndex = b.map(function (obj, index) {
-            if (obj.key == key) {
-                return index;
-            }
-        }).filter(isFinite);
-
-        return (dir === 'asc') ? (a[aIndex].value < b[bIndex].value) : (a[aIndex].value > b[bIndex].value);
-    }
-}
-
 function formatText(d) {
     switch (d.config.format) {
         case 'text':

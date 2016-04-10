@@ -2,24 +2,6 @@
     'use strict';
 
 /*global define, module, exports, require */
-function sortByKey(key, dir) {
-    return function (a, b) {
-        var aIndex = a.map(function (obj, index) {
-            if (obj.key == key) {
-                return index;
-            }
-        }).filter(isFinite);
-
-        var bIndex = b.map(function (obj, index) {
-            if (obj.key == key) {
-                return index;
-            }
-        }).filter(isFinite);
-
-        return (dir === 'asc') ? (a[aIndex].value < b[bIndex].value) : (a[aIndex].value > b[bIndex].value);
-    }
-}
-
 function formatText(d) {
     switch (d.config.format) {
         case 'text':
@@ -220,6 +202,26 @@ Table.prototype.sortColumn = function (selection) {
     this.sort({key: key, direction: newDirection});
     this.redraw();
 };
+
+function sortByKey(key, dir) {
+    return function (a, b) {
+        var aIndex = a.map(function (obj, index) {
+            if (obj.key == key) {
+                return index;
+            }
+        }).filter(isFinite);
+
+        var bIndex = b.map(function (obj, index) {
+            if (obj.key == key) {
+                return index;
+            }
+        }).filter(isFinite);
+
+        return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
+    }
+}
+
+
 Table.prototype.redrawHeader = function () {
     var columns = this.columns();
     var self = this;
@@ -247,7 +249,7 @@ Table.prototype.redrawHeader = function () {
                 if (self._sort.key === d.key) {
                     if ('direction' in self._sort) {
                         glyph = (self._sort.direction === "asc") ?
-                            "noticon noticon-downarrow" : "noticon noticon-uparrow"
+                            "noticon noticon-uparrow" : "noticon noticon-downarrow"
                     }
                 }
             }
@@ -281,7 +283,7 @@ Table.prototype.redrawHeader = function () {
                 if (self._sort.key === d.key) {
                     if ('direction' in self._sort) {
                         glyph = (self._sort.direction === "asc") ?
-                            "noticon noticon-downarrow" : "noticon noticon-uparrow"
+                            "noticon noticon-uparrow" : "noticon noticon-downarrow"
                     }
                 }
             }
