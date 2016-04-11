@@ -8,6 +8,7 @@ Table.prototype.redrawHeader = function () {
     headerCells.enter().append('th')
         .on('click', function (d) {
             self.sortColumn(d);
+            self.redraw();
         })
         .style('width', function (d) {
             return d.width;

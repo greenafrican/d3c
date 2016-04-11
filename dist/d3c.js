@@ -157,6 +157,7 @@ Table.prototype.recalculate = function() {
         this._columns = columns;
     }
 
+    console.log("sorting");
     this.sort();
 };
 
@@ -181,7 +182,6 @@ Table.prototype.sort = function (sort) {
         };
         this.sort();
     }
-    this.redraw();
     return this._sort;
 };
 
@@ -199,7 +199,6 @@ Table.prototype.sortColumn = function (selection) {
         }
     }
     this.sort({key: key, direction: newDirection});
-    this.redraw();
 };
 
 function sortByKey(key, dir) {
@@ -231,6 +230,7 @@ Table.prototype.redrawHeader = function () {
     headerCells.enter().append('th')
         .on('click', function (d) {
             self.sortColumn(d);
+            self.redraw();
         })
         .style('width', function (d) {
             return d.width;

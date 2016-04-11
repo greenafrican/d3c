@@ -120,6 +120,7 @@ Table.prototype.recalculate = function() {
         this._columns = columns;
     }
 
+    console.log("sorting");
     this.sort();
 };
 

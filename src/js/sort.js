@@ -16,7 +16,6 @@ Table.prototype.sort = function (sort) {
         };
         this.sort();
     }
-    this.redraw();
     return this._sort;
 };
 
@@ -34,7 +33,6 @@ Table.prototype.sortColumn = function (selection) {
         }
     }
     this.sort({key: key, direction: newDirection});
-    this.redraw();
 };
 
 function sortByKey(key, dir) {
