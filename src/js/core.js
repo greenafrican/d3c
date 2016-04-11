@@ -58,6 +58,7 @@ Table.prototype.updateRow = function (row) {
             });
         }
     }
+    console.log("Index found:", i);
 
     data[i] = updatedRow;
 
