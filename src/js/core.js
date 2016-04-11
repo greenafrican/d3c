@@ -47,7 +47,10 @@ Table.prototype.addRow = function (row) {
 Table.prototype.updateRow = function (row) {
     var data = this._data;
     var i = findIndex(data, 'name', row.name);
-    if (!i) this.addRow(row);
+    if (!i) {
+        this.addRow(row);
+        return;
+    }
 
     var updatedRow = [];
     for (var k in row) {
@@ -58,7 +61,6 @@ Table.prototype.updateRow = function (row) {
             });
         }
     }
-    console.log("Index found:", i);
 
     data[i] = updatedRow;
 
