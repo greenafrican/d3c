@@ -42,7 +42,7 @@ function findIndex(array, key, value) {
         for (var j = 0; j < array[i].length; j++) {
             if ('key' in array[i][j]) {
                 console.debug(array[i][j], key, value);
-                if (array[i][j].key === key && 'value' in array[i][j]) {
+                if (array[i][j].key == key && 'value' in array[i][j]) {
                     console.debug('match key');
                     if (array[i][j].value === value) {
                         console.debug('match value');
