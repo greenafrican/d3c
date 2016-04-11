@@ -86,8 +86,13 @@
         }, 3500);
 
         setTimeout(function () {
-            console.log("Go sort()");
-            d3cTable.sort({ key: 'chart_change', direction: 'desc'});
+            d3cTable.updateRow({
+                'name': 'Pigs',
+                'latest': 108000,
+                'previous': 100000,
+                'difference': 8000,
+                'chart_change': 0.08
+            });
         }, 7000);
 
         window.addEventListener('resize', function (event) {

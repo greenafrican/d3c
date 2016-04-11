@@ -44,6 +44,27 @@ Table.prototype.addRow = function (row) {
     this.redraw();
 };
 
+Table.prototype.updateRow = function (row) {
+    var data = this._data;
+    var i = findIndex(data, 'name', row.name);
+    if (!i) this.addRow(row);
+
+    var updatedRow = [];
+    for (var k in row) {
+        if (row.hasOwnProperty(k)) {
+            updatedRow.push({
+                key: k,
+                value: row[k]
+            });
+        }
+    }
+
+    data[i] = updatedRow;
+
+    this.redraw()
+};
+
+
 Table.prototype.columns = function (columns) {
     if (arguments.length === 0) return this._columns || [];
     columns || (columns = {});

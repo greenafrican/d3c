@@ -35,6 +35,23 @@ function pickColor(color) {
     //return ( l > 0.179 ) ? 'black' :'white';
     return ( l > 0.5 ) ? 'black' : 'white';
 }
+
+function findIndex(array, key, value) {
+
+    for (var i = 0; i < array.length; i++) {
+        for (var j = 0; j < array[i].length; j++) {
+            if ('key' in array[i][j]) {
+                if (array[i][j].key === key && 'value' in array[i][j]) {
+                    if (array[i][j].value === value) {
+                        return i;
+                    }
+                }
+            }
+        }
+    }
+
+    return null;
+}
 var d3c = {version: "0.0.1"};
 
 function Table(config) {
@@ -80,6 +97,27 @@ Table.prototype.addRow = function (row) {
 
     this.redraw();
 };
+
+Table.prototype.updateRow = function (row) {
+    var data = this._data;
+    var i = findIndex(data, 'name', row.name);
+    if (!i) this.addRow(row);
+
+    var updatedRow = [];
+    for (var k in row) {
+        if (row.hasOwnProperty(k)) {
+            updatedRow.push({
+                key: k,
+                value: row[k]
+            });
+        }
+    }
+
+    data[i] = updatedRow;
+
+    this.redraw()
+};
+
 
 Table.prototype.columns = function (columns) {
     if (arguments.length === 0) return this._columns || [];
