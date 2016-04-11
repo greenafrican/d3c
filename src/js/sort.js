@@ -1,13 +1,13 @@
 Table.prototype.sort = function (sort) {
     var data = this.data();
-    if (data.length === 0 && arguments.length === 0) return this._sort || {};
+    if (data.length < 2 && arguments.length === 0) return this._sort || {};
     if (arguments.length === 0) {
         sort = this._sort || {};
-        if ('key' in sort) {
+        if ('key' in sort && sort['key'].length) {
             if ('direction' in sort) {
+                console.debug(sort);
                 data.sort(sortByKey(sort.key, sort.direction));
                 this._data = data;
-                console.log(data);
             }
         }
     } else {
@@ -49,6 +49,9 @@ function sortByKey(key, dir) {
                 return index;
             }
         }).filter(isFinite);
+
+        console.debug(a, aIndex);
+        console.debug(b, bIndex);
 
         return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
     }
