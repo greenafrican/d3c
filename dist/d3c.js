@@ -109,6 +109,8 @@ Table.prototype.updateRow = function (row) {
         return;
     }
 
+    console.log(row);
+
     var updatedRow = [];
     for (var k in row) {
         if (row.hasOwnProperty(k)) {
