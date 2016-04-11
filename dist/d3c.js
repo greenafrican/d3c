@@ -126,7 +126,7 @@ Table.prototype.recalculate = function() {
                 col.chart.color = d3.scale.quantize()
                     .domain([col.chart.minX, 0, col.chart.maxX])
                     .range(col.chart.colors);
-                
+
                 col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
             }
         });
@@ -171,6 +171,7 @@ Table.prototype.sort = function (sort) {
             if ('direction' in sort) {
                 data.sort(sortByKey(sort.key, sort.direction));
                 this._data = data;
+                console.log(data);
             }
         }
     } else {
@@ -178,7 +179,7 @@ Table.prototype.sort = function (sort) {
             key: ('key' in sort) ? sort.key : "",
             direction: ('direction' in sort) ? sort.direction : "asc"
         };
-        this.sort();
+        this.redraw();
     }
     return this._sort;
 };

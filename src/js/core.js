@@ -89,7 +89,7 @@ Table.prototype.recalculate = function() {
                 col.chart.color = d3.scale.quantize()
                     .domain([col.chart.minX, 0, col.chart.maxX])
                     .range(col.chart.colors);
-                
+
                 col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
             }
         });
