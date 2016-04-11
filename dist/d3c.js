@@ -41,11 +41,8 @@ function findIndex(array, key, value) {
     for (var i = 0; i < array.length; i++) {
         for (var j = 0; j < array[i].length; j++) {
             if ('key' in array[i][j]) {
-                console.debug(array[i][j].key, key, array[i][j].key === key);
                 if (array[i][j].key === key && 'value' in array[i][j]) {
-                    console.debug('match key');
                     if (array[i][j].value === value) {
-                        console.debug('match value', i);
                         return i;
                     }
                 }
@@ -104,7 +101,7 @@ Table.prototype.addRow = function (row) {
 Table.prototype.updateRow = function (row) {
     var data = this._data;
     var i = findIndex(data, 'name', row.name);
-    
+
     if (i == null) {
         this.addRow(row);
         return;

@@ -47,7 +47,7 @@ Table.prototype.addRow = function (row) {
 Table.prototype.updateRow = function (row) {
     var data = this._data;
     var i = findIndex(data, 'name', row.name);
-    
+
     if (i == null) {
         this.addRow(row);
         return;
