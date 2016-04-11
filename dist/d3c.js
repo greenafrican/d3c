@@ -95,6 +95,7 @@ Table.prototype.recalculate = function() {
         this.selectTable.node().getBoundingClientRect().width;
 
     if (columns.length > 0 && data.length > 0) { // TODO: handle data without column definitions
+
         columns.forEach(function(col,i) {
             if (col.type === 'chart' || col.type === 'highlight') {
                 col.chart = col.chart || {};
@@ -152,13 +153,10 @@ Table.prototype.recalculate = function() {
 
         });
 
-        if (arguments.length === 0) return this._columns || [];
-        columns || (columns = {});
-        this._columns = columns;
     }
 
-    console.log("sorting");
     this.sort();
+
 };
 
 
