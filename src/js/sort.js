@@ -7,6 +7,7 @@ Table.prototype.sort = function (sort) {
             if ('direction' in sort) {
                 data.sort(sortByKey(sort.key, sort.direction));
                 this._data = data;
+                console.log(data);
             }
         }
     } else {
