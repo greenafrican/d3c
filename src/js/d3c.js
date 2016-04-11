@@ -43,9 +43,9 @@ function findIndex(array, key, value) {
             if ('key' in array[i][j]) {
                 console.debug(array[i][j], key, value);
                 if (array[i][j].key === key && 'value' in array[i][j]) {
-                    console.log('match key');
+                    console.debug('match key');
                     if (array[i][j].value === value) {
-                        console.log('match value');
+                        console.debug('match value');
                         return i;
                     }
                 }
