@@ -116,17 +116,17 @@ Table.prototype.recalculate = function() {
 
                 col.chart.maxX = d3.max(col.chart.values, function (v) { return +v; });
                 col.chart.minX = d3.min(col.chart.values, function (v) { return +v; });
-                col.chart.minX = (col.chart.minX === col.chart.maxX) ? 0 : col.chart.minX;
-                col.chart.maxX = (Math.abs(col.chart.maxX) > Math.abs(col.chart.minX)) ?
+
+                col.chart.maxX = (col.chart.maxX > Math.abs(col.chart.minX)) ?
                     col.chart.maxX : Math.abs(col.chart.minX);
-                col.chart.minX = (Math.abs(col.chart.minX) > Math.abs(col.chart.maxX)) ?
+                col.chart.minX = (col.chart.minX < (-1 * col.chart.maxX)) ?
                     col.chart.minX : (-1 * col.chart.maxX);
 
                 col.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#c6e3bb", "#a3d393", "#64bc52"];
                 col.chart.color = d3.scale.quantize()
                     .domain([col.chart.minX, 0, col.chart.maxX])
                     .range(col.chart.colors);
-                col.chart.minX = (col.chart.minX >= 0) ? 0 : col.chart.minX;
+                
                 col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
             }
         });
@@ -169,7 +169,6 @@ Table.prototype.sort = function (sort) {
         sort = this._sort || {};
         if ('key' in sort && sort['key'].length) {
             if ('direction' in sort) {
-                console.debug(sort);
                 data.sort(sortByKey(sort.key, sort.direction));
                 this._data = data;
             }
@@ -213,9 +212,6 @@ function sortByKey(key, dir) {
                 return index;
             }
         }).filter(isFinite);
-
-        console.debug(a, aIndex);
-        console.debug(b, bIndex);
 
         return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
     }

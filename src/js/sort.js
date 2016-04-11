@@ -5,7 +5,6 @@ Table.prototype.sort = function (sort) {
         sort = this._sort || {};
         if ('key' in sort && sort['key'].length) {
             if ('direction' in sort) {
-                console.debug(sort);
                 data.sort(sortByKey(sort.key, sort.direction));
                 this._data = data;
             }
@@ -49,9 +48,6 @@ function sortByKey(key, dir) {
                 return index;
             }
         }).filter(isFinite);
-
-        console.debug(a, aIndex);
-        console.debug(b, bIndex);
 
         return (dir === 'asc') ? (a[aIndex].value > b[bIndex].value) : (a[aIndex].value < b[bIndex].value);
     }
