@@ -12,12 +12,9 @@ function Table(config) {
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
     this.sort(('sort' in config) ?  config.sort : {});
-    this.chart(('chart' in config) ? config.chart : {});
+    this.c3 = window.c3;
+    this.chart(('chart' in config) ? config.chart : {data: {json: []}});
 }
-
-Table.prototype.chart = function(config) {
-    return new Chart(config);
-};
 
 Table.prototype.data = function (data) {
     if (arguments.length === 0) return this._data || [];

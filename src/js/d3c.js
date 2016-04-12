@@ -38,19 +38,19 @@ function pickColor(color) {
 }
 
 
-function Chart(config) {
-    this.config(config || {});
-    this.c3 = window.c3;
-}
-
-Chart.prototype.config = function (config) {
-    if (arguments.length === 0) return this._config || [];
+Table.prototype.chart = function(config) {
+    if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart || {};
     config || (config = {});
-    this._config = config;
+    this.chart.config(config);
+    this._chart = this.c3.generate(this.chart.config()); // TODO: update if exists
+    return this._chart;
 };
 
-Chart.prototype.generate = function () {
-    return this.c3.generate(this.config());
+Table.prototype.chart.config = function(config) {
+    if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart_config || {};
+    config || (config = {});
+    this._chart_config = config;
+    return this._chart_config; // TODO: update if config changes and exists
 };
 
 function Table(config) {
@@ -67,12 +67,9 @@ function Table(config) {
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
     this.sort(('sort' in config) ?  config.sort : {});
-    this.chart(('chart' in config) ? config.chart : {});
+    this.c3 = window.c3;
+    this.chart(('chart' in config) ? config.chart : {data: {json: []}});
 }
-
-Table.prototype.chart = function(config) {
-    return new Chart(config);
-};
 
 Table.prototype.data = function (data) {
     if (arguments.length === 0) return this._data || [];
