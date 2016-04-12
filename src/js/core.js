@@ -1,5 +1,3 @@
-var d3c = {version: "0.0.1"};
-
 function Table(config) {
     config = config || {};
     this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
@@ -14,7 +12,12 @@ function Table(config) {
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
     this.sort(('sort' in config) ?  config.sort : {});
+    this.chart(('chart' in config) ? config.chart : {});
 }
+
+Table.prototype.chart = function(config) {
+    return new Chart(config);
+};
 
 Table.prototype.data = function (data) {
     if (arguments.length === 0) return this._data || [];
@@ -46,7 +49,23 @@ Table.prototype.addRow = function (row) {
 
 Table.prototype.updateRow = function (row) {
     var data = this._data;
-    var i = findIndex(data, 'name', row.name);
+
+    var findIndexForUpdate = function (array, key, value) {
+        for (var i = 0; i < array.length; i++) {
+            for (var j = 0; j < array[i].length; j++) {
+                if ('key' in array[i][j]) {
+                    if (array[i][j].key === key && 'value' in array[i][j]) {
+                        if (array[i][j].value === value) {
+                            return i;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    };
+
+    var i = findIndexForUpdate(data, 'name', row.name);
 
     if (i == null) {
         this.addRow(row);
@@ -65,7 +84,8 @@ Table.prototype.updateRow = function (row) {
 
     data[i] = updatedRow;
 
-    this.redraw()
+    this.redraw();
+
 };
 
 

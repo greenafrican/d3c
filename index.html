@@ -4,8 +4,11 @@
 <script type="text/javascript" src="dist/d3.min.js"></script>
 <script type="text/javascript" src="dist/c3.min.js"></script>
 <script type="text/javascript" src="dist/d3c.js"></script>
+
+<link href="dist/c3.min.css" rel="stylesheet" type="text/css">
+
 <script>
-    var d3cTable;
+    var d3cTable, d3cChart;
     $(document).ready(function () {
         d3cTable = d3c.table({
             bindto: "#d3c-table",
@@ -49,51 +52,42 @@
                     'previous': 565000.00,
                     'difference': -65000,
                     'chart_change': -0.0581
+                },
+                {
+                    'name': 'Donkeys',
+                    'latest': 2500.00,
+                    'previous': 2465.00,
+                    'difference': 35,
+                    'chart_change': 0.0375
+                },
+                {
+                    'name': 'Pigs',
+                    'latest': 102000,
+                    'previous': 10000,
+                    'difference': 2,
+                    'chart_change': 0.005
                 }]
         });
 
-        setTimeout(function () {
-
-            //d3c.columns([
-            //    {
-            //        title: "Firstname",
-            //        key: 'name',
-            //        width: "25%",
-            //        type: "text"
-            //    },
-            //    {
-            //        title: "Change",
-            //        key: 'chart_change',
-            //        width: "40%",
-            //        type: "chart"
-            //    }
-            //]);
-            d3cTable.addRow({
-                'name': 'Donkeys',
-                'latest': 2500.00,
-                'previous': 2465.00,
-                'difference': 35,
-                'chart_change': 0.0375
-            });
-
-            d3cTable.addRow({
-                'name': 'Active Users [28d]',
-                'latest': 102000,
-                'previous': 10000,
-                'difference': 2,
-                'chart_change': 0.005
-            });
-        }, 3500);
+        d3cChart = d3cTable.chart({
+            bindto: '#d3c-chart',
+            data: {
+                columns: [
+                    ['data1', 30, 200, 100, 400, 150, 250],
+                    ['data2', 50, 20, 10, 40, 15, 25]
+                ]
+            }
+        });
 
         setTimeout(function () {
             d3cTable.updateRow({
-                'name': 'Active Users [28d]',
+                'name': 'Pigs',
                 'latest': 108000,
                 'previous': 100000,
                 'difference': 8000,
                 'chart_change': 0.08
             });
-        }, 7000);
+        }, 3500);
 
         window.addEventListener('resize', function (event) {
             d3cTable.redraw();
@@ -102,6 +96,11 @@
 </script>
 
 <div class="container">
+    <div class="row">
+        <div class="twelve columns">
+            <div id="d3c-chart"></div>
+        </div>
+    </div>
     <div class="row">
         <div class="twelve columns">
             <div id="d3c-table"></div>
