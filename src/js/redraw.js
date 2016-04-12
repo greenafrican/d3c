@@ -72,6 +72,7 @@ Table.prototype.redrawHeader = function () {
 };
 
 Table.prototype.redrawRows = function () {
+    var self = this;
     var data = this.data();
 
     if (data.length > 0) {
@@ -103,6 +104,9 @@ Table.prototype.redrawRows = function () {
             .remove();
 
         var cells_in_new_rows = rows.enter().append('tr')
+            .on('click', function (d, i) {
+                self.rowSelect(d);
+            })
             .selectAll('td')
             .data(function (d) {
                 return $.grep(d, function (e) {

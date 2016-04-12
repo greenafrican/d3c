@@ -41,17 +41,38 @@ function pickColor(color) {
 Table.prototype.chart = function(config) {
     if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart || {};
     config || (config = {});
-    this.chart.config(config);
-    this._chart = this.c3.generate(this.chart.config()); // TODO: update if exists
+    this.chartConfig(config);
+    this._chart = this.c3.generate(this.chartConfig()); // TODO: update if exists
     return this._chart;
 };
 
-Table.prototype.chart.config = function(config) {
+Table.prototype.chartConfig = function(config) {
     if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart_config || {};
     config || (config = {});
     this._chart_config = config;
     return this._chart_config; // TODO: update if config changes and exists
 };
+
+Table.prototype.rowSelect = function(row) {
+    var self = this;
+    row.forEach(function(cell, i) {
+        if (cell.key === 'series') {
+            self.chart().load(
+                {
+                    json: cell.value,
+                    keys: {
+                        x: 'x',
+                        value: ['y']
+                    },
+                    names: {
+                        'y': row[0].value
+                    }
+                }
+            );
+        }
+    });
+};
+
 
 function Table(config) {
     config = config || {};
@@ -352,6 +373,7 @@ Table.prototype.redrawHeader = function () {
 };
 
 Table.prototype.redrawRows = function () {
+    var self = this;
     var data = this.data();
 
     if (data.length > 0) {
@@ -383,6 +405,9 @@ Table.prototype.redrawRows = function () {
             .remove();
 
         var cells_in_new_rows = rows.enter().append('tr')
+            .on('click', function (d, i) {
+                self.rowSelect(d);
+            })
             .selectAll('td')
             .data(function (d) {
                 return $.grep(d, function (e) {

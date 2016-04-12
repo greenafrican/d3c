@@ -50,23 +50,69 @@
                     'name': 'Cows',
                     'latest': 500000.00,
                     'previous': 565000.00,
-                    'difference': -65000,
-                    'chart_change': -0.0581
+                    'chart_change': -0.0581,
+                    'series': [
+                        {
+                            x: new Date('2015-04-01'),
+                            y: 565000
+                        },
+                        {
+                            x: new Date('2015-04-02'),
+                            y: 530000
+                        },
+                        {
+                            x: new Date('2015-04-03'),
+                            y: 500000
+                        }
+                    ]
                 },
                 {
                     'name': 'Donkeys',
                     'latest': 2500.00,
                     'previous': 2465.00,
-                    'difference': 35,
-                    'chart_change': 0.0375
+                    'chart_change': 0.0375,
+                    'series': [
+                        {
+                            x: new Date('2015-04-01'),
+                            y: 2000
+                        },
+                        {
+                            x: new Date('2015-04-02'),
+                            y: 2100
+                        },
+                        {
+                            x: new Date('2015-04-03'),
+                            y: 2500
+                        }
+                    ]
                 },
                 {
                     'name': 'Pigs',
                     'latest': 102000,
                     'previous': 10000,
-                    'difference': 2,
                     'chart_change': 0.005
-                }]
+                }],
+            chart: {
+                bindto: '#d3c-chart',
+                data: {
+                    json: []
+                },
+                axis: {
+                    x: {
+                        type: 'timeseries',
+                        tick: {
+                            format: '%Y-%m-%d',
+                            count: 5
+                        }
+                    },
+                    y: {
+                        tick: {
+                            format: d3.format(".3s"),
+                            count: 5
+                        }
+                    }
+                },
+            }
         });
 
         setTimeout(function () {
