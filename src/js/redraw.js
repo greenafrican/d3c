@@ -139,6 +139,7 @@ Table.prototype.redrawRows = function () {
 
 function drawCell(selection) {
 
+
     selection.each(function (dd, i) {
         var $$ = d3.select(this);
         if (dd.config.type === 'chart') {

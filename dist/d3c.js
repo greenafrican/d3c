@@ -205,13 +205,21 @@ Table.prototype.recalculate = function() {
 
                 col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
             }
+
+            data.forEach(function(row, i) {
+                var checkRow = $.grep(row, function (e) {
+                    return e.key === col.key;
+                });
+                if ($.isEmptyObject(checkRow[0]) || checkRow.length === 0) {
+                    row.push({key: col.key, value: ''});
+                }
+            });
+
         });
 
         data.forEach(function(row, i) {
             row.forEach(function(cell, ii) {
-                var columnConfig = $.grep(columns, function (e) {
-                    return e.key === cell.key;
-                });
+
                 cell.config = columnConfig[0] || {};
                 cell.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
                 if ('chart' in cell.config) {
@@ -434,6 +442,7 @@ Table.prototype.redrawRows = function () {
 };
 
 function drawCell(selection) {
+
 
     selection.each(function (dd, i) {
         var $$ = d3.select(this);
