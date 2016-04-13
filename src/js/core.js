@@ -140,7 +140,7 @@ Table.prototype.recalculate = function() {
                     return e.key === col.key;
                 });
                 if ($.isEmptyObject(checkRow[0]) || checkRow.length === 0) {
-                    row.splice(i, 0, {key: col.key, value: ''});
+                    row.splice(i, 0, {key: col.key, value: '-'});
                 }
             });
         });

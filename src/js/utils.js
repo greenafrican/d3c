@@ -1,4 +1,5 @@
 function formatText(d) {
+    if (d.value === '-') return '-';
     switch (d.config.format) {
         case 'text':
             return d.value;

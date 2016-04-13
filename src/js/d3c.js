@@ -4,6 +4,7 @@
     /*global define, module, exports, require */
     var d3c = {version: "0.0.1"};
 function formatText(d) {
+    if (d.value === '-') return '-';
     switch (d.config.format) {
         case 'text':
             return d.value;
@@ -211,7 +212,7 @@ Table.prototype.recalculate = function() {
                     return e.key === col.key;
                 });
                 if ($.isEmptyObject(checkRow[0]) || checkRow.length === 0) {
-                    row.splice(i, 0, {key: col.key, value: ''});
+                    row.splice(i, 0, {key: col.key, value: '-'});
                 }
             });
         });
