@@ -57,6 +57,7 @@ Table.prototype.rowSelect = function(row) {
     var self = this;
     row.forEach(function(cell, i) {
         if (cell.key === 'series') {
+            console.log(row);
             self.chart().load(
                 {
                     json: cell.value,
