@@ -20,14 +20,7 @@ Table.prototype.rowSelect = function(row) {
             console.log(row);
             self.chart().load(
                 {
-                    json: cell.value,
-                    keys: {
-                        x: 'x',
-                        value: ['y']
-                    },
-                    names: {
-                        'y': row[0].value
-                    }
+                    json: cell.value
                 }
             );
         }
