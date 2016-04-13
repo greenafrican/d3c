@@ -148,6 +148,9 @@ Table.prototype.recalculate = function() {
 
         data.forEach(function(row, i) {
             row.forEach(function(cell, ii) {
+                var columnConfig = $.grep(row, function (e) {
+                    return e.key === cell.key;
+                });
 
                 cell.config = columnConfig[0] || {};
                 cell.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
