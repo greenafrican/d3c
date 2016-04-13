@@ -150,7 +150,6 @@ Table.prototype.recalculate = function() {
                 var columnConfig = $.grep(columns, function (e) {
                     return e.key === cell.key;
                 });
-                console.log(columnConfig);
                 cell.config = columnConfig[0] || {};
                 cell.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
                 if ('chart' in cell.config) {
