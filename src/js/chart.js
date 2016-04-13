@@ -23,7 +23,6 @@ Table.prototype.rowSelect = function (row) {
                     keys: chart.internal.config.data_keys
                 }
             );
-
         }
     });
 };

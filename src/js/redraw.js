@@ -79,7 +79,6 @@ Table.prototype.redrawRows = function () {
         var rows = this.selectTable.select('tbody').selectAll('tr').data(data);
         var cells = rows.selectAll('td').data(function (d) {
             return $.grep(d, function (e) {
-                // only include rows that fit the column definitions as per bindColumnConfig()
                 return e.config.match;
             });
         });
@@ -104,8 +103,10 @@ Table.prototype.redrawRows = function () {
             .remove();
 
         var cells_in_new_rows = rows.enter().append('tr')
-            .on('click', function (d, i) {
+            .on('click', function (d) {
                 self.rowSelect(d);
+                self.selectTable.select('tbody').selectAll('tr').classed('d3c-table-row-active', false);
+                d3.select(this).classed('d3c-table-row-active', true);
             })
             .selectAll('td')
             .data(function (d) {
@@ -241,6 +242,7 @@ function drawCell(selection) {
                     return hcolor(d.value)
                 })
                 .style('text-align', 'center')
+                .style('border-radius', '3px')
                 .text(function (d) {
                     return formatText(d);
                 })

@@ -114,7 +114,7 @@
                     },
                     colors: {
                         'previous': '#e5e5e5',
-                        'latest': '#64bc52'
+                        'latest': '#0099dc'
                     }
                 },
                 area: {
@@ -180,7 +180,13 @@
 
     #d3c-table table {
         width: 100%;
+        border-collapse: collapse;
     }
+    #d3c-table table,
+    #d3c-table tr,
+    #d3c-table th {margin:0;border:0;padding:0;}
+
+    #d3c-table td {margin:0;padding:8px;border:0;}
 
     .d3c-chart-label-neg-high,
     .d3c-chart-label-pos-high {
@@ -190,6 +196,10 @@
     .d3c-chart-label-neg-low,
     .d3c-chart-label-pos-low {
         fill: #000;
+    }
+
+    .d3c-table-row-active {
+        background-color: #e5f5fb;
     }
 
 </style>
