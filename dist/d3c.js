@@ -206,23 +206,22 @@ Table.prototype.recalculate = function() {
                 col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
             }
 
-            data.forEach(function(row, i) {
+            data.forEach(function(row) { // TODO: more elegant solution needed for aligning column and row definitions
                 var checkRow = $.grep(row, function (e) {
                     return e.key === col.key;
                 });
                 if ($.isEmptyObject(checkRow[0]) || checkRow.length === 0) {
-                    row.push({key: col.key, value: ''});
+                    row.splice(i, 0, {key: col.key, value: ''});
                 }
             });
-
         });
 
         data.forEach(function(row, i) {
             row.forEach(function(cell, ii) {
-                var columnConfig = $.grep(row, function (e) {
+                var columnConfig = $.grep(columns, function (e) {
                     return e.key === cell.key;
                 });
-
+                console.log(columnConfig);
                 cell.config = columnConfig[0] || {};
                 cell.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
                 if ('chart' in cell.config) {
@@ -239,6 +238,8 @@ Table.prototype.recalculate = function() {
             });
 
         });
+
+
 
     }
 
