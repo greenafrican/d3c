@@ -54,15 +54,16 @@ Table.prototype.chartConfig = function (config) {
 };
 
 Table.prototype.rowSelect = function (row) {
-    var self = this;
+    var chart = this.chart();
     row.forEach(function (cell, i) {
         if (cell.key === 'series') {
-            console.log(JSON.stringify(cell.value));
-            self.chart().load(
+            chart.load(
                 {
-                    json: cell.value
+                    json: cell.value,
+                    keys: chart.internal.config.data_keys
                 }
             );
+
         }
     });
 };

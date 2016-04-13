@@ -2,7 +2,7 @@
 <script type="text/javascript" src="dist/moment.js"></script>
 <script type="text/javascript" src="dist/calendar.js"></script>
 <script type="text/javascript" src="dist/d3.min.js"></script>
-<script type="text/javascript" src="dist/c3.min.js"></script>
+<script type="text/javascript" src="dist/c3.js"></script>
 <script type="text/javascript" src="dist/d3c.js"></script>
 
 <link href="dist/c3.min.css" rel="stylesheet" type="text/css">
@@ -53,17 +53,18 @@
                     'chart_change': -0.0581,
                     'series': [
                         {
-                            x: new Date('2015-04-01'),
-                            y: 565000
-                        },
-                        {
-                            x: new Date('2015-04-02'),
-                            y: 530000
-                        },
-                        {
-                            x: new Date('2015-04-03'),
-                            y: 500000
-                        }
+                            "date": "2016-04-06",
+                            "latest": "2587000",
+                            "previous": "2590587"
+                        }, {"date": "2016-04-07", "latest": "2586129", "previous": "2588963"}, {
+                            "date": "2016-04-08",
+                            "latest": "2586149",
+                            "previous": "2588555"
+                        }, {"date": "2016-04-09", "latest": "2586902", "previous": "2587207"}, {
+                            "date": "2016-04-10",
+                            "latest": "2587642",
+                            "previous": "2586522"
+                        }, {"date": "2016-04-11", "latest": "2590781", "previous": "2586768"}
                     ]
                 },
                 {
@@ -73,17 +74,18 @@
                     'chart_change': 0.0375,
                     'series': [
                         {
-                            x: new Date('2015-04-01'),
-                            y: 2000
-                        },
-                        {
-                            x: new Date('2015-04-02'),
-                            y: 2100
-                        },
-                        {
-                            x: new Date('2015-04-03'),
-                            y: 2500
-                        }
+                            "date": "2016-04-06",
+                            "latest": "2587000",
+                            "previous": "2590587"
+                        }, {"date": "2016-04-07", "latest": "2586129", "previous": "2588963"}, {
+                            "date": "2016-04-08",
+                            "latest": "2586149",
+                            "previous": "2588555"
+                        }, {"date": "2016-04-09", "latest": "2586902", "previous": "2587207"}, {
+                            "date": "2016-04-10",
+                            "latest": "2587642",
+                            "previous": "2586522"
+                        }, {"date": "2016-04-11", "latest": "2590781", "previous": "2586768"}
                     ]
                 },
                 {
@@ -95,7 +97,29 @@
             chart: {
                 bindto: '#d3c-chart',
                 data: {
-                    json: []
+                    json: [],
+                    names: {
+                        'previous': 'Previous',
+                        'latest': 'Latest'
+                    },
+                    keys: {
+                        x: 'date',
+                        value: ['latest', 'previous']
+                    },
+                    type: 'line',
+                    types: {
+                        'previous': 'area'
+                    },
+                    classes: {
+                        'previous': 'd3c-previous'
+                    },
+                    colors: {
+                        'previous': '#e5e5e5',
+                        'latest': '#64bc52'
+                    }
+                },
+                area: {
+                    zerobased: false
                 },
                 axis: {
                     x: {
@@ -124,15 +148,6 @@
                 'chart_change': 0.08
             });
 
-//            d3cTable.chart({
-//                bindto: '#d3c-chart',
-//                data: {
-//                    columns: [
-//                        ['data1', 30, 200, 100, 400, 150, 250],
-//                        ['data2', 50, 20, 10, 40, 15, 25]
-//                    ]
-//                }
-//            });
         }, 3500);
 
         window.addEventListener('resize', function (event) {
