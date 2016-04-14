@@ -197,10 +197,6 @@ Table.prototype.recalculate = function() {
 
         });
 
-        console.log(this);
-
-
-
     }
 
     this.sort();
