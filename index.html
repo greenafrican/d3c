@@ -24,7 +24,7 @@
                     title: "Latest",
                     key: 'latest',
                     width: "40%",
-                    type: "chart",
+                    type: "chart-bar",
                     format: "number",
                     chart: {
                         zeroBased: true,
@@ -34,36 +34,44 @@
                 {
                     title: "Previous",
                     key: 'previous',
-                    width: "15%",
+                    width: "10%",
                     type: "cell",
                     format: "number"
                 },
                 {
                     title: "Change",
                     key: 'chart_change',
-                    width: "15%",
+                    width: "10%",
                     type: "highlight",
                     format: "percent"
+                },
+                {
+                    title: "Spark",
+                    key: 'chart_spark',
+                    width: "10%",
+                    type: "chart-spark",
+                    format: "number",
+                    chart: {
+                        keys: {
+                            x: 'date',
+                            value: 'latest'
+                        }
+                    }
                 }],
             data: [
                 {
                     'name': 'Cows',
                     'latest': 500000.00,
                     'chart_change': -0.0581,
+                    'chart_spark': 'series',
                     'series': [
                         {
-                            "date": "2016-04-06",
-                            "latest": "2587000",
-                            "previous": "2590587"
-                        }, {"date": "2016-04-07", "latest": "2586129", "previous": "2588963"}, {
-                            "date": "2016-04-08",
-                            "latest": "2586149",
-                            "previous": "2588555"
-                        }, {"date": "2016-04-09", "latest": "2586902", "previous": "2587207"}, {
-                            "date": "2016-04-10",
-                            "latest": "2587642",
-                            "previous": "2586522"
-                        }, {"date": "2016-04-11", "latest": "2590781", "previous": "2586768"}
+                            "date": "2016-04-06", "latest": "1", "previous": "2"
+                        }, {"date": "2016-04-07","latest": "2", "previous": "2"}, {
+                            "date": "2016-04-08","latest": "3", "previous": "2"
+                        }, {"date": "2016-04-09", "latest": "2", "previous": "2"}, {
+                            "date": "2016-04-10","latest": "1", "previous": "2"
+                        }, {"date": "2016-04-11", "latest": "4", "previous": "2"}
                     ]
                 },
                 {
@@ -71,27 +79,16 @@
                     'latest': 2500.00,
                     'previous': 2465.00,
                     'chart_change': 0.0375,
+                    'chart_spark': 'series',
                     'series': [
                         {
-                            "date": "2016-04-06",
-                            "latest": "2587000",
-                            "previous": "2590587"
-                        }, {"date": "2016-04-07", "latest": "2586129", "previous": "2588963"}, {
-                            "date": "2016-04-08",
-                            "latest": "2586149",
-                            "previous": "2588555"
-                        }, {"date": "2016-04-09", "latest": "2586902", "previous": "2587207"}, {
-                            "date": "2016-04-10",
-                            "latest": "2587642",
-                            "previous": "2586522"
-                        }, {"date": "2016-04-11", "latest": "2590781", "previous": "2586768"}
+                            "date": "2016-04-06", "latest": "5", "previous": "2"
+                        }, {"date": "2016-04-07","latest": "4", "previous": "2"}, {
+                            "date": "2016-04-08","latest": "3", "previous": "2"
+                        }, {"date": "2016-04-09", "latest": "2", "previous": "2"}, {
+                            "date": "2016-04-10","latest": "1", "previous": "2"
+                        }, {"date": "2016-04-11", "latest": "4", "previous": "2"}
                     ]
-                },
-                {
-                    'name': 'Pigs',
-                    'latest': 102000,
-                    'previous': 10000,
-                    'chart_change': 0.005
                 }],
             chart: {
                 bindto: '#d3c-chart',

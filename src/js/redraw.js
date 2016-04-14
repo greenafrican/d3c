@@ -143,7 +143,7 @@ function drawCell(selection) {
 
     selection.each(function (dd, i) {
         var $$ = d3.select(this);
-        if (dd.config.type === 'chart') {
+        if (dd.config.type === 'chart-bar') {
             var x = dd.config.chart.x;
             var color = dd.config.chart.color;
             var width = dd.config.chart.width;
@@ -249,6 +249,19 @@ function drawCell(selection) {
                 .style('color', function (d) {
                     return pickColor(d3.select(this).style('background-color'));
                 });
+        } else if (dd.config.type === 'chart-spark') {
+            width = dd.config.chart.width;
+            $$.select('svg').remove();
+
+            var svgSpark = $$.append('svg')
+                .attr({
+                    "width": width,
+                    "height": 20
+                })
+                .append('path')
+                .attr('d', dd.config.chart.line(dd.config.chart.values))
+                .attr('stroke', 'black').attr('stroke-width', 0.5).attr('fill', 'none');
+
         } else {
             $$.text(function (d) {
                 return formatText(d);

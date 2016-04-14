@@ -102,37 +102,45 @@ Table.prototype.recalculate = function() {
     if (columns.length > 0 && data.length > 0) { // TODO: handle data without column definitions
 
         columns.forEach(function(col,i) {
-            if (col.type === 'chart' || col.type === 'highlight') {
+            if (col.type === 'chart-bar' || col.type === 'highlight' || col.type === 'chart-spark') {
                 col.chart = col.chart || {};
                 col.chart.values = [];
-                data.forEach(function (row) {
-                    row.forEach(function (cell) {
-                        if (cell.key === col.key) {
-                            col.chart.values.push(+cell.value);
-                        }
-                    });
-                });
+
                 var widthRatio = parseFloat(col.width) / 100;
 
                 col.chart = col.chart || {};
                 col.chart.zeroBased = col.chart.zeroBased || false;
                 col.chart.width = Math.floor(tableWidth * widthRatio);
-                col.chart.x = d3.scale.linear().range([0, col.chart.width]);
 
-                col.chart.maxX = d3.max(col.chart.values, function (v) { return +v; });
-                col.chart.minX = d3.min(col.chart.values, function (v) { return +v; });
+                if (col.type === 'chart-bar' || col.type === 'highlight') {
+                    data.forEach(function (row) {
+                        row.forEach(function (cell) {
+                            if (cell.key === col.key) {
+                                col.chart.values.push(+cell.value);
+                            }
+                        });
+                    });
 
-                col.chart.maxX = (col.chart.maxX > Math.abs(col.chart.minX)) ?
-                    col.chart.maxX : Math.abs(col.chart.minX);
-                col.chart.minX = (col.chart.minX < (-1 * col.chart.maxX)) ?
-                    col.chart.minX : (-1 * col.chart.maxX);
+                    col.chart.x = d3.scale.linear().range([0, col.chart.width]);
+                    col.chart.maxX = d3.max(col.chart.values, function (v) { return +v; });
+                    col.chart.minX = d3.min(col.chart.values, function (v) { return +v; });
 
-                col.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#c6e3bb", "#a3d393", "#64bc52"];
-                col.chart.color = d3.scale.quantize()
-                    .domain([col.chart.minX, 0, col.chart.maxX])
-                    .range(col.chart.colors);
+                    col.chart.maxX = (col.chart.maxX > Math.abs(col.chart.minX)) ?
+                        col.chart.maxX : Math.abs(col.chart.minX);
+                    col.chart.minX = (col.chart.minX < (-1 * col.chart.maxX)) ?
+                        col.chart.minX : (-1 * col.chart.maxX);
 
-                col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
+                    col.chart.colors = ["#f05336", "#faa224", "#ffd73e", "#c6e3bb", "#a3d393", "#64bc52"];
+                    col.chart.color = d3.scale.quantize()
+                        .domain([col.chart.minX, 0, col.chart.maxX])
+                        .range(col.chart.colors);
+
+                    col.chart.x.domain([(col.chart.zeroBased) ? 0 : col.chart.minX, col.chart.maxX]).nice();
+
+                } else if (col.type === 'chart-spark') {
+                    col.chart.values = [];
+                }
+
             }
 
             data.forEach(function(row) { // TODO: more elegant solution needed for aligning column and row definitions
@@ -150,9 +158,9 @@ Table.prototype.recalculate = function() {
                 var columnConfig = $.grep(columns, function (e) {
                     return e.key === cell.key;
                 });
-                cell.config = columnConfig[0] || {};
+                cell.config = $.extend(true, {}, columnConfig[0]) || {};
                 cell.config.match = $.isEmptyObject(columnConfig[0]) ? false : true;
-                if ('chart' in cell.config) {
+                if ('chart' in cell.config && (cell.config.type === 'chart-bar' || cell.config.type === 'highlight')) {
                     cell.x = cell.config.chart.x(cell.value) || 0;
                     cell.color = cell.config.chart.color(cell.value) || '#000';
                     if ('colorFrom' in cell.config.chart) {
@@ -162,10 +170,34 @@ Table.prototype.recalculate = function() {
 
                         cell.color = cellFrom[0].color || cell.color;
                     }
+                } else if ('chart' in cell.config && cell.config.type === 'chart-spark') {
+                    var seriesFrom = $.grep(row, function (e) {
+                        return e.key === 'series';
+                    });
+                    cell.config.chart.values = (seriesFrom.length > 0) ? seriesFrom[0].value : [];
+
+                    var v = cell.config.chart.values.map(function(o) {
+                        return o[cell.config.chart.keys.value];
+                    });
+
+                    cell.config.chart.values = v;
+
+                    cell.config.chart.x = d3.scale.linear().domain([0, v.length-1]).range([0, cell.config.chart.width]);
+                    cell.config.chart.y = d3.scale.linear().domain([d3.max(v), d3.min(v)]).range([0, 20]);
+                    cell.config.chart.line = d3.svg.line()
+                        .x(function(d,i) {
+                            return cell.config.chart.x(i);
+                        })
+                        .y(function(d) {
+                            return cell.config.chart.y(d);
+                        })
                 }
+
             });
 
         });
+
+        console.log(this);
 
 
 
