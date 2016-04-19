@@ -2,6 +2,9 @@ function Table(config) {
     config = config || {};
     this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
 
+    this.c3 = window.c3;
+    this.chart(('chart' in config) ? config.chart : {data: {columns: []}});
+
     this.selectTable = d3.select(this.bindto).append('table');
     this.selectTable
         .append('thead')
@@ -11,9 +14,7 @@ function Table(config) {
 
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
-    this.sort(('sort' in config) ?  config.sort : {});
-    this.c3 = window.c3;
-    this.chart(('chart' in config) ? config.chart : {data: {json: []}});
+    this.sort(('sort' in config) ? config.sort : {});
 }
 
 Table.prototype.data = function (data) {
@@ -21,7 +22,7 @@ Table.prototype.data = function (data) {
     this._data = this._data || [];
     var self = this;
 
-    data.forEach(function(row) {
+    data.forEach(function (row) {
         self.addRow(row);
     });
 
@@ -29,17 +30,22 @@ Table.prototype.data = function (data) {
 };
 
 Table.prototype.addRow = function (row) {
-    var newRow = [];
+    var chart = this.chart();
+    var newRow = [], name, series = [];
     for (var k in row) {
         if (row.hasOwnProperty(k)) {
             newRow.push({
                 key: k,
                 value: row[k]
             });
+            if (k === 'series') series = row[k];
+            if (k === 'name') name = row[k];
         }
     }
 
     this._data.push(newRow);
+
+    this.chartUpdate();
 
     this.redraw();
 };
@@ -76,10 +82,14 @@ Table.prototype.updateRow = function (row) {
                 key: k,
                 value: row[k]
             });
+            if (k === 'series') series = row[k];
+            if (k === 'name') name = row[k];
         }
     }
 
     data[i] = updatedRow;
+
+    this.chartUpdate();
 
     this.redraw();
 
@@ -94,14 +104,15 @@ Table.prototype.columns = function (columns) {
     this.redraw();
 };
 
-Table.prototype.recalculate = function() {
+
+Table.prototype.recalculate = function () {
     var columns = this.columns(), data = this.data();
     var tableWidth = ('undefined' === typeof this.selectTable.node()) ? 100 :
         this.selectTable.node().getBoundingClientRect().width;
 
     if (columns.length > 0 && data.length > 0) { // TODO: handle data without column definitions
 
-        columns.forEach(function(col,i) {
+        columns.forEach(function (col, i) {
             if (col.type === 'chart-bar' || col.type === 'highlight' || col.type === 'chart-spark') {
                 col.chart = col.chart || {};
                 col.chart.values = [];
@@ -122,8 +133,12 @@ Table.prototype.recalculate = function() {
                     });
 
                     col.chart.x = d3.scale.linear().range([0, col.chart.width]);
-                    col.chart.maxX = d3.max(col.chart.values, function (v) { return +v; });
-                    col.chart.minX = d3.min(col.chart.values, function (v) { return +v; });
+                    col.chart.maxX = d3.max(col.chart.values, function (v) {
+                        return +v;
+                    });
+                    col.chart.minX = d3.min(col.chart.values, function (v) {
+                        return +v;
+                    });
 
                     col.chart.maxX = (col.chart.maxX > Math.abs(col.chart.minX)) ?
                         col.chart.maxX : Math.abs(col.chart.minX);
@@ -143,7 +158,7 @@ Table.prototype.recalculate = function() {
 
             }
 
-            data.forEach(function(row) { // TODO: more elegant solution needed for aligning column and row definitions
+            data.forEach(function (row) { // TODO: more elegant solution needed for aligning column and row definitions
                 var checkRow = $.grep(row, function (e) {
                     return e.key === col.key;
                 });
@@ -153,8 +168,8 @@ Table.prototype.recalculate = function() {
             });
         });
 
-        data.forEach(function(row, i) {
-            row.forEach(function(cell, ii) {
+        data.forEach(function (row, i) {
+            row.forEach(function (cell, ii) {
                 var columnConfig = $.grep(columns, function (e) {
                     return e.key === cell.key;
                 });
@@ -174,21 +189,24 @@ Table.prototype.recalculate = function() {
                     var seriesFrom = $.grep(row, function (e) {
                         return e.key === 'series';
                     });
+                    var nameFrom = $.grep(row, function (e) {
+                        return e.key === 'name';
+                    });
                     cell.config.chart.values = (seriesFrom.length > 0) ? seriesFrom[0].value : [];
-
-                    var v = cell.config.chart.values.map(function(o) {
-                        return o[cell.config.chart.keys.value];
+                    var name = (nameFrom.length > 0) ? nameFrom[0].value : '';
+                    var v = cell.config.chart.values.map(function (o) {
+                        return o[name];
                     });
 
                     cell.config.chart.values = v;
 
-                    cell.config.chart.x = d3.scale.linear().domain([0, v.length-1]).range([0, cell.config.chart.width]);
+                    cell.config.chart.x = d3.scale.linear().domain([0, v.length - 1]).range([0, cell.config.chart.width]);
                     cell.config.chart.y = d3.scale.linear().domain([d3.max(v), d3.min(v)]).range([0, 20]);
                     cell.config.chart.line = d3.svg.line()
-                        .x(function(d,i) {
+                        .x(function (d, i) {
                             return cell.config.chart.x(i);
                         })
-                        .y(function(d) {
+                        .y(function (d) {
                             return cell.config.chart.y(d);
                         })
                 }
@@ -202,6 +220,3 @@ Table.prototype.recalculate = function() {
     this.sort();
 
 };
-
-
-

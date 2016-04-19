@@ -105,8 +105,8 @@ Table.prototype.redrawRows = function () {
         var cells_in_new_rows = rows.enter().append('tr')
             .on('click', function (d) {
                 self.rowSelect(d);
-                self.selectTable.select('tbody').selectAll('tr').classed('d3c-table-row-active', false);
-                d3.select(this).classed('d3c-table-row-active', true);
+                var hasClass = d3.select(this).classed('d3c-table-row-active');
+                d3.select(this).classed('d3c-table-row-active', !hasClass);
             })
             .selectAll('td')
             .data(function (d) {

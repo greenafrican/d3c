@@ -38,6 +38,24 @@ function pickColor(color) {
     return ( l > 0.5 ) ? 'black' : 'white';
 }
 
+Array.prototype.indexOfObj = function(o) {
+    var arr = this;
+    for (var i = 0; i < arr.length; i++) {
+        if (JSON.stringify(arr[i]) === JSON.stringify(o)) { // TODO: hmmm may need better way to compare objects
+            return i;
+        }
+    }
+    return -1;
+};
+
+function toggleArrayItem(a, v) {
+    var i = a.indexOf(v);
+    if (i === -1)
+        a.push(v);
+    else
+        a.splice(i,1);
+}
+
 
 Table.prototype.chart = function (config) {
     if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart || {};
@@ -47,6 +65,7 @@ Table.prototype.chart = function (config) {
     return this._chart;
 };
 
+
 Table.prototype.chartConfig = function (config) {
     if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart_config || {};
     config || (config = {});
@@ -54,16 +73,70 @@ Table.prototype.chartConfig = function (config) {
     return this._chart_config; // TODO: update if config changes and exists
 };
 
+
+Table.prototype.chartUpdate = function () {
+    var self = this;
+    var chart = this.chart();
+    var data = this.data();
+    var xs =  [], columns = [];
+
+    data.forEach(function(row) {
+        var series = [];
+        [xs, series] = self.getChartSeries(row);
+        columns.push(series);
+    });
+    columns.unshift(xs); // TODO: may need to handle series with different date/x ranges
+    self._chart_config.columns = columns;
+    chart.load({columns: self._chart_config.columns});
+    chart.hide();
+    chart.show(self._chart_config.show, {withLegend: true})
+};
+
+
+Table.prototype.getChartSeries = function(row) {
+    // Get row id (name)
+    var nameCell = row.filter(function(obj) {
+        return obj.key === 'name';
+    });
+    var name = (nameCell.length === 1) ? nameCell[0].value : 'y';
+
+    // Get row series
+    var seriesCell = row.filter(function(obj) {
+        return obj.key === 'series';
+    });
+    var series = (seriesCell.length === 1) ? seriesCell[0].value : [];
+
+    // Get values from series
+    var values = series.map(function(d) {
+        return d[name];
+    });
+    values.unshift(name);
+
+    // Get xs from series
+    var x = this.chartConfig().data.x || 'x';
+    var xs = series.map(function(d) {
+        return d[x];
+    });
+    xs.unshift(x);
+
+    return [xs, values];
+};
+
+
 Table.prototype.rowSelect = function (row) {
     var chart = this.chart();
-    row.forEach(function (cell, i) {
+    var nameCell = row.filter(function(obj) {
+        return obj.key === 'name';
+    });
+    var name = (nameCell.length === 1) ? nameCell[0].value : 'y';
+
+    row.forEach(function (cell) {
         if (cell.key === 'series') {
-            chart.load(
-                {
-                    json: cell.value,
-                    keys: chart.internal.config.data_keys
-                }
-            );
+            self._chart_config = self._chart_config || {};
+            self._chart_config.show = self._chart_config.show || [];
+            toggleArrayItem(self._chart_config.show, name);
+            chart.hide(null, {withLegend: true});
+            chart.show(self._chart_config.show, {withLegend: true});
         }
     });
 };
@@ -72,6 +145,9 @@ Table.prototype.rowSelect = function (row) {
 function Table(config) {
     config = config || {};
     this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
+
+    this.c3 = window.c3;
+    this.chart(('chart' in config) ? config.chart : {data: {columns: []}});
 
     this.selectTable = d3.select(this.bindto).append('table');
     this.selectTable
@@ -82,9 +158,7 @@ function Table(config) {
 
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
-    this.sort(('sort' in config) ?  config.sort : {});
-    this.c3 = window.c3;
-    this.chart(('chart' in config) ? config.chart : {data: {json: []}});
+    this.sort(('sort' in config) ? config.sort : {});
 }
 
 Table.prototype.data = function (data) {
@@ -92,7 +166,7 @@ Table.prototype.data = function (data) {
     this._data = this._data || [];
     var self = this;
 
-    data.forEach(function(row) {
+    data.forEach(function (row) {
         self.addRow(row);
     });
 
@@ -100,17 +174,22 @@ Table.prototype.data = function (data) {
 };
 
 Table.prototype.addRow = function (row) {
-    var newRow = [];
+    var chart = this.chart();
+    var newRow = [], name, series = [];
     for (var k in row) {
         if (row.hasOwnProperty(k)) {
             newRow.push({
                 key: k,
                 value: row[k]
             });
+            if (k === 'series') series = row[k];
+            if (k === 'name') name = row[k];
         }
     }
 
     this._data.push(newRow);
+
+    this.chartUpdate();
 
     this.redraw();
 };
@@ -147,10 +226,14 @@ Table.prototype.updateRow = function (row) {
                 key: k,
                 value: row[k]
             });
+            if (k === 'series') series = row[k];
+            if (k === 'name') name = row[k];
         }
     }
 
     data[i] = updatedRow;
+
+    this.chartUpdate();
 
     this.redraw();
 
@@ -165,14 +248,15 @@ Table.prototype.columns = function (columns) {
     this.redraw();
 };
 
-Table.prototype.recalculate = function() {
+
+Table.prototype.recalculate = function () {
     var columns = this.columns(), data = this.data();
     var tableWidth = ('undefined' === typeof this.selectTable.node()) ? 100 :
         this.selectTable.node().getBoundingClientRect().width;
 
     if (columns.length > 0 && data.length > 0) { // TODO: handle data without column definitions
 
-        columns.forEach(function(col,i) {
+        columns.forEach(function (col, i) {
             if (col.type === 'chart-bar' || col.type === 'highlight' || col.type === 'chart-spark') {
                 col.chart = col.chart || {};
                 col.chart.values = [];
@@ -193,8 +277,12 @@ Table.prototype.recalculate = function() {
                     });
 
                     col.chart.x = d3.scale.linear().range([0, col.chart.width]);
-                    col.chart.maxX = d3.max(col.chart.values, function (v) { return +v; });
-                    col.chart.minX = d3.min(col.chart.values, function (v) { return +v; });
+                    col.chart.maxX = d3.max(col.chart.values, function (v) {
+                        return +v;
+                    });
+                    col.chart.minX = d3.min(col.chart.values, function (v) {
+                        return +v;
+                    });
 
                     col.chart.maxX = (col.chart.maxX > Math.abs(col.chart.minX)) ?
                         col.chart.maxX : Math.abs(col.chart.minX);
@@ -214,7 +302,7 @@ Table.prototype.recalculate = function() {
 
             }
 
-            data.forEach(function(row) { // TODO: more elegant solution needed for aligning column and row definitions
+            data.forEach(function (row) { // TODO: more elegant solution needed for aligning column and row definitions
                 var checkRow = $.grep(row, function (e) {
                     return e.key === col.key;
                 });
@@ -224,8 +312,8 @@ Table.prototype.recalculate = function() {
             });
         });
 
-        data.forEach(function(row, i) {
-            row.forEach(function(cell, ii) {
+        data.forEach(function (row, i) {
+            row.forEach(function (cell, ii) {
                 var columnConfig = $.grep(columns, function (e) {
                     return e.key === cell.key;
                 });
@@ -245,21 +333,24 @@ Table.prototype.recalculate = function() {
                     var seriesFrom = $.grep(row, function (e) {
                         return e.key === 'series';
                     });
+                    var nameFrom = $.grep(row, function (e) {
+                        return e.key === 'name';
+                    });
                     cell.config.chart.values = (seriesFrom.length > 0) ? seriesFrom[0].value : [];
-
-                    var v = cell.config.chart.values.map(function(o) {
-                        return o[cell.config.chart.keys.value];
+                    var name = (nameFrom.length > 0) ? nameFrom[0].value : '';
+                    var v = cell.config.chart.values.map(function (o) {
+                        return o[name];
                     });
 
                     cell.config.chart.values = v;
 
-                    cell.config.chart.x = d3.scale.linear().domain([0, v.length-1]).range([0, cell.config.chart.width]);
+                    cell.config.chart.x = d3.scale.linear().domain([0, v.length - 1]).range([0, cell.config.chart.width]);
                     cell.config.chart.y = d3.scale.linear().domain([d3.max(v), d3.min(v)]).range([0, 20]);
                     cell.config.chart.line = d3.svg.line()
-                        .x(function(d,i) {
+                        .x(function (d, i) {
                             return cell.config.chart.x(i);
                         })
-                        .y(function(d) {
+                        .y(function (d) {
                             return cell.config.chart.y(d);
                         })
                 }
@@ -273,10 +364,6 @@ Table.prototype.recalculate = function() {
     this.sort();
 
 };
-
-
-
-
 Table.prototype.sort = function (sort) {
     var data = this.data();
     if (data.length < 2 && arguments.length === 0) return this._sort || {};
@@ -440,8 +527,8 @@ Table.prototype.redrawRows = function () {
         var cells_in_new_rows = rows.enter().append('tr')
             .on('click', function (d) {
                 self.rowSelect(d);
-                self.selectTable.select('tbody').selectAll('tr').classed('d3c-table-row-active', false);
-                d3.select(this).classed('d3c-table-row-active', true);
+                var hasClass = d3.select(this).classed('d3c-table-row-active');
+                d3.select(this).classed('d3c-table-row-active', !hasClass);
             })
             .selectAll('td')
             .data(function (d) {

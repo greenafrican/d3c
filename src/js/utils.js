@@ -33,3 +33,21 @@ function pickColor(color) {
     return ( l > 0.5 ) ? 'black' : 'white';
 }
 
+Array.prototype.indexOfObj = function(o) {
+    var arr = this;
+    for (var i = 0; i < arr.length; i++) {
+        if (JSON.stringify(arr[i]) === JSON.stringify(o)) { // TODO: hmmm may need better way to compare objects
+            return i;
+        }
+    }
+    return -1;
+};
+
+function toggleArrayItem(a, v) {
+    var i = a.indexOf(v);
+    if (i === -1)
+        a.push(v);
+    else
+        a.splice(i,1);
+}
+
