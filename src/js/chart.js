@@ -27,11 +27,14 @@ Table.prototype.chartUpdate = function () {
         var series = [];
         [xs, series] = self.getChartSeries(row);
         columns.push(series);
-        if (chart.internal.hiddenTargetIds.indexOf(series[0]) === -1) {
-            chart.internal.hiddenTargetIds = chart.internal.hiddenTargetIds.concat(series[0]);
-        }
-        if (chart.internal.hiddenLegendIds.indexOf(series[0]) === -1) {
-            chart.internal.hiddenLegendIds = chart.internal.hiddenLegendIds.concat(series[0]);
+        var name = self.getRowName(row);
+        if (self.selected.indexOf(name) === -1) {
+            if (chart.internal.hiddenTargetIds.indexOf(name) === -1) {
+                chart.internal.hiddenTargetIds = chart.internal.hiddenTargetIds.concat(name);
+            }
+            if (chart.internal.hiddenLegendIds.indexOf(name) === -1) {
+                chart.internal.hiddenLegendIds = chart.internal.hiddenLegendIds.concat(name);
+            }
         }
 
     });

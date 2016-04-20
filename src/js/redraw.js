@@ -84,7 +84,7 @@ Table.prototype.redrawRows = function () {
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;
             });
-        
+
         var cells = rows.selectAll('td').data(function (d) {
             return $.grep(d, function (e) {
                 return e.config.match;
