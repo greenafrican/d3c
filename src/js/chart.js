@@ -1,6 +1,8 @@
 Table.prototype.chart = function (config) {
+    var self = this;
     if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart || {};
     config || (config = {});
+
     this.chartConfig(config);
     this._chart = this.c3.generate(this.chartConfig()); // TODO: update if exists
     return this._chart;
@@ -25,12 +27,13 @@ Table.prototype.chartUpdate = function () {
         var series = [];
         [xs, series] = self.getChartSeries(row);
         columns.push(series);
+        chart.internal.addHiddenTargetIds(series[0]);
+        chart.internal.addHiddenLegendIds(series[0]);
+
     });
     columns.unshift(xs); // TODO: may need to handle series with different date/x ranges
     self._chart_config.columns = columns;
     chart.load({columns: self._chart_config.columns});
-    chart.hide();
-    chart.show(self._chart_config.show, {withLegend: true})
 };
 
 

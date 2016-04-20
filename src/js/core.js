@@ -38,8 +38,6 @@ Table.prototype.addRow = function (row) {
                 key: k,
                 value: row[k]
             });
-            if (k === 'series') series = row[k];
-            if (k === 'name') name = row[k];
         }
     }
 
@@ -72,7 +70,7 @@ Table.prototype.updateRow = function (row) {
 
     if (i == null) {
         this.addRow(row);
-        return;
+        return ;
     }
 
     var updatedRow = [];
@@ -82,8 +80,6 @@ Table.prototype.updateRow = function (row) {
                 key: k,
                 value: row[k]
             });
-            if (k === 'series') series = row[k];
-            if (k === 'name') name = row[k];
         }
     }
 
