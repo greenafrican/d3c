@@ -1,6 +1,7 @@
 function Table(config) {
     config = config || {};
     this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
+    this.selected = ('selected' in config) ? config.selected : [];
 
     this.c3 = window.c3;
     this.chart(('chart' in config) ? config.chart : {data: {columns: []}});
@@ -215,4 +216,13 @@ Table.prototype.recalculate = function () {
 
     this.sort();
 
+};
+
+Table.prototype.getRowName = function(row) {
+    row = row || [];
+    for (var i = 0; i < row.length; i++) {
+        if (row[i].key === 'name') {
+            return row[i].value;
+        }
+    }
 };

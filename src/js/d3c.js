@@ -57,6 +57,8 @@ function toggleArrayItem(a, v) {
 }
 
 
+
+
 Table.prototype.chart = function (config) {
     var self = this;
     if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart || {};
@@ -86,8 +88,12 @@ Table.prototype.chartUpdate = function () {
         var series = [];
         [xs, series] = self.getChartSeries(row);
         columns.push(series);
-        chart.internal.addHiddenTargetIds(series[0]);
-        chart.internal.addHiddenLegendIds(series[0]);
+        if (chart.internal.hiddenTargetIds.indexOf(series[0]) === -1) {
+            chart.internal.hiddenTargetIds = chart.internal.hiddenTargetIds.concat(series[0]);
+        }
+        if (chart.internal.hiddenLegendIds.indexOf(series[0]) === -1) {
+            chart.internal.hiddenLegendIds = chart.internal.hiddenLegendIds.concat(series[0]);
+        }
 
     });
     columns.unshift(xs); // TODO: may need to handle series with different date/x ranges
@@ -97,50 +103,41 @@ Table.prototype.chartUpdate = function () {
 
 
 Table.prototype.getChartSeries = function(row) {
-    // Get row id (name)
-    var nameCell = row.filter(function(obj) {
-        return obj.key === 'name';
-    });
+    var nameCell = row.filter(function(obj) {return obj.key === 'name';});
     var name = (nameCell.length === 1) ? nameCell[0].value : 'y';
 
-    // Get row series
-    var seriesCell = row.filter(function(obj) {
-        return obj.key === 'series';
-    });
+    var seriesCell = row.filter(function(obj) {return obj.key === 'series';});
     var series = (seriesCell.length === 1) ? seriesCell[0].value : [];
 
-    // Get values from series
-    var values = series.map(function(d) {
-        return d[name];
-    });
+    var values = series.map(function(d) {return d[name];});
     values.unshift(name);
 
-    // Get xs from series
     var x = this.chartConfig().data.x || 'x';
-    var xs = series.map(function(d) {
-        return d[x];
-    });
+    var xs = series.map(function(d) {return d[x];});
     xs.unshift(x);
 
     return [xs, values];
 };
 
 
-Table.prototype.rowSelect = function (row) {
+Table.prototype.rowSelect = function (row, selection) {
+
+    var self = this;
     var chart = this.chart();
-    var nameCell = row.filter(function(obj) {
-        return obj.key === 'name';
-    });
-    var name = (nameCell.length === 1) ? nameCell[0].value : 'y';
+    var name = self.getRowName(row);
 
     row.forEach(function (cell) {
         if (cell.key === 'series') {
             self._chart_config = self._chart_config || {};
-            self._chart_config.show = self._chart_config.show || [];
-            toggleArrayItem(self._chart_config.show, name);
+            self.selected = self.selected || [];
+            toggleArrayItem(self.selected, name);
             chart.hide(null, {withLegend: true});
-            chart.show(self._chart_config.show, {withLegend: true});
+            chart.show(self.selected, {withLegend: true});
         }
+    });
+
+    d3.select(selection).classed('d3c-table-row-active', function () {
+        return self.selected.indexOf(name) !== -1;
     });
 };
 
@@ -148,6 +145,7 @@ Table.prototype.rowSelect = function (row) {
 function Table(config) {
     config = config || {};
     this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
+    this.selected = ('selected' in config) ? config.selected : [];
 
     this.c3 = window.c3;
     this.chart(('chart' in config) ? config.chart : {data: {columns: []}});
@@ -363,6 +361,15 @@ Table.prototype.recalculate = function () {
     this.sort();
 
 };
+
+Table.prototype.getRowName = function(row) {
+    row = row || [];
+    for (var i = 0; i < row.length; i++) {
+        if (row[i].key === 'name') {
+            return row[i].value;
+        }
+    }
+};
 Table.prototype.sort = function (sort) {
     var data = this.data();
     if (data.length < 2 && arguments.length === 0) return this._sort || {};
@@ -384,6 +391,7 @@ Table.prototype.sort = function (sort) {
     return this._sort;
 };
 
+
 Table.prototype.sortColumn = function (selection) {
     var self = this;
     var key = selection.key || "";
@@ -399,6 +407,7 @@ Table.prototype.sortColumn = function (selection) {
     }
     this.sort({key: key, direction: newDirection});
 };
+
 
 function sortByKey(key, dir) {
     return function (a, b) {
@@ -497,7 +506,15 @@ Table.prototype.redrawRows = function () {
     var data = this.data();
 
     if (data.length > 0) {
-        var rows = this.selectTable.select('tbody').selectAll('tr').data(data);
+        var rows = this.selectTable.select('tbody').selectAll('tr')
+            .data(data)
+            .on('click', function (d) {
+                self.rowSelect(d, this);
+            })
+            .classed('d3c-table-row-active', function (d) {
+                return self.selected.indexOf(self.getRowName(d)) !== -1;
+            });
+        
         var cells = rows.selectAll('td').data(function (d) {
             return $.grep(d, function (e) {
                 return e.config.match;
@@ -525,9 +542,10 @@ Table.prototype.redrawRows = function () {
 
         var cells_in_new_rows = rows.enter().append('tr')
             .on('click', function (d) {
-                self.rowSelect(d);
-                var hasClass = d3.select(this).classed('d3c-table-row-active');
-                d3.select(this).classed('d3c-table-row-active', !hasClass);
+                self.rowSelect(d, this);
+            })
+            .classed('d3c-table-row-active', function (d) {
+                return self.selected.indexOf(self.getRowName(d)) !== -1;
             })
             .selectAll('td')
             .data(function (d) {

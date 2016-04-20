@@ -27,8 +27,12 @@ Table.prototype.chartUpdate = function () {
         var series = [];
         [xs, series] = self.getChartSeries(row);
         columns.push(series);
-        chart.internal.addHiddenTargetIds(series[0]);
-        chart.internal.addHiddenLegendIds(series[0]);
+        if (chart.internal.hiddenTargetIds.indexOf(series[0]) === -1) {
+            chart.internal.hiddenTargetIds = chart.internal.hiddenTargetIds.concat(series[0]);
+        }
+        if (chart.internal.hiddenLegendIds.indexOf(series[0]) === -1) {
+            chart.internal.hiddenLegendIds = chart.internal.hiddenLegendIds.concat(series[0]);
+        }
 
     });
     columns.unshift(xs); // TODO: may need to handle series with different date/x ranges
@@ -38,50 +42,41 @@ Table.prototype.chartUpdate = function () {
 
 
 Table.prototype.getChartSeries = function(row) {
-    // Get row id (name)
-    var nameCell = row.filter(function(obj) {
-        return obj.key === 'name';
-    });
+    var nameCell = row.filter(function(obj) {return obj.key === 'name';});
     var name = (nameCell.length === 1) ? nameCell[0].value : 'y';
 
-    // Get row series
-    var seriesCell = row.filter(function(obj) {
-        return obj.key === 'series';
-    });
+    var seriesCell = row.filter(function(obj) {return obj.key === 'series';});
     var series = (seriesCell.length === 1) ? seriesCell[0].value : [];
 
-    // Get values from series
-    var values = series.map(function(d) {
-        return d[name];
-    });
+    var values = series.map(function(d) {return d[name];});
     values.unshift(name);
 
-    // Get xs from series
     var x = this.chartConfig().data.x || 'x';
-    var xs = series.map(function(d) {
-        return d[x];
-    });
+    var xs = series.map(function(d) {return d[x];});
     xs.unshift(x);
 
     return [xs, values];
 };
 
 
-Table.prototype.rowSelect = function (row) {
+Table.prototype.rowSelect = function (row, selection) {
+
+    var self = this;
     var chart = this.chart();
-    var nameCell = row.filter(function(obj) {
-        return obj.key === 'name';
-    });
-    var name = (nameCell.length === 1) ? nameCell[0].value : 'y';
+    var name = self.getRowName(row);
 
     row.forEach(function (cell) {
         if (cell.key === 'series') {
             self._chart_config = self._chart_config || {};
-            self._chart_config.show = self._chart_config.show || [];
-            toggleArrayItem(self._chart_config.show, name);
+            self.selected = self.selected || [];
+            toggleArrayItem(self.selected, name);
             chart.hide(null, {withLegend: true});
-            chart.show(self._chart_config.show, {withLegend: true});
+            chart.show(self.selected, {withLegend: true});
         }
+    });
+
+    d3.select(selection).classed('d3c-table-row-active', function () {
+        return self.selected.indexOf(name) !== -1;
     });
 };
 

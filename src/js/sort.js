@@ -19,6 +19,7 @@ Table.prototype.sort = function (sort) {
     return this._sort;
 };
 
+
 Table.prototype.sortColumn = function (selection) {
     var self = this;
     var key = selection.key || "";
@@ -34,6 +35,7 @@ Table.prototype.sortColumn = function (selection) {
     }
     this.sort({key: key, direction: newDirection});
 };
+
 
 function sortByKey(key, dir) {
     return function (a, b) {
