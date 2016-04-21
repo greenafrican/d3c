@@ -287,6 +287,15 @@ Table.prototype.getRowName = function(row) {
     }
 };
 
+Table.prototype.getRowDescription = function(row) {
+    row = row || [];
+    for (var i = 0; i < row.length; i++) {
+        if (row[i].key === 'description') {
+            return row[i].value;
+        }
+    }
+};
+
 
 
 Table.prototype.chart = function (config) {
@@ -525,7 +534,7 @@ Table.prototype.redrawRows = function () {
                 self.rowSelect(d, this);
             })
             .on('mouseover', function (d) {
-                d3.select(self.description).html(self.getRowName(d));
+                d3.select(self.description).html(self.getRowDescription(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;
@@ -561,7 +570,7 @@ Table.prototype.redrawRows = function () {
                 self.rowSelect(d, this);
             })
             .on('mouseover', function (d) {
-                d3.select(self.description).html(self.getRowName(d));
+                d3.select(self.description).html(self.getRowDescription(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;

@@ -86,7 +86,7 @@ Table.prototype.redrawRows = function () {
                 self.rowSelect(d, this);
             })
             .on('mouseover', function (d) {
-                d3.select(self.description).html(self.getRowName(d));
+                d3.select(self.description).html(self.getRowDescription(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;
@@ -122,7 +122,7 @@ Table.prototype.redrawRows = function () {
                 self.rowSelect(d, this);
             })
             .on('mouseover', function (d) {
-                d3.select(self.description).html(self.getRowName(d));
+                d3.select(self.description).html(self.getRowDescription(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;

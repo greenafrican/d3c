@@ -227,3 +227,12 @@ Table.prototype.getRowName = function(row) {
         }
     }
 };
+
+Table.prototype.getRowDescription = function(row) {
+    row = row || [];
+    for (var i = 0; i < row.length; i++) {
+        if (row[i].key === 'description') {
+            return row[i].value;
+        }
+    }
+};
