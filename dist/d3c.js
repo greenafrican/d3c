@@ -534,7 +534,12 @@ Table.prototype.redrawRows = function () {
                 self.rowSelect(d, this);
             })
             .on('mouseover', function (d) {
-                d3.select(self.description).html(self.getRowDescription(d));
+                var html =
+                    '<div class="d3c-table-descr">' +
+                        '<strong>' + self.getRowName(d) + ': </strong>' +
+                        self.getRowDescription(d) +
+                    '</div>';
+                d3.select(self.description).html(html);
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;
@@ -570,7 +575,12 @@ Table.prototype.redrawRows = function () {
                 self.rowSelect(d, this);
             })
             .on('mouseover', function (d) {
-                d3.select(self.description).html(self.getRowDescription(d));
+                var html =
+                    '<div class="d3c-table-descr">' +
+                    '<strong>' + self.getRowName(d) + ': </strong>' +
+                    self.getRowDescription(d) +
+                    '</div>';
+                d3.select(self.description).html(html);
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;
