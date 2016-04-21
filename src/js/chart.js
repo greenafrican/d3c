@@ -1,3 +1,6 @@
+
+
+
 Table.prototype.chart = function (config) {
     var self = this;
     if (arguments.length === 0 || $.isEmptyObject(config)) return this._chart || {};
@@ -65,7 +68,8 @@ Table.prototype.getChartSeries = function(row) {
 Table.prototype.rowSelect = function (row, selection) {
 
     var self = this;
-    var chart = this.chart();
+    var chart = this.chart(self._chart_config);
+
     var name = self.getRowName(row);
 
     row.forEach(function (cell) {
@@ -81,5 +85,7 @@ Table.prototype.rowSelect = function (row, selection) {
     d3.select(selection).classed('d3c-table-row-active', function () {
         return self.selected.indexOf(name) !== -1;
     });
-};
 
+    self.chartUpdate();
+
+};

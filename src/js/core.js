@@ -16,6 +16,8 @@ function Table(config) {
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
     this.sort(('sort' in config) ? config.sort : {});
+    this.allInstances = [];
+    this.allInstances.push(this);
 }
 
 Table.prototype.data = function (data) {
