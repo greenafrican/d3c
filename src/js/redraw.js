@@ -76,10 +76,17 @@ Table.prototype.redrawRows = function () {
     var data = this.data();
 
     if (data.length > 0) {
-        var rows = this.selectTable.select('tbody').selectAll('tr')
+        var rows = this.selectTable.select('tbody')
+            .on('mouseout', function (d) {
+                d3.select(self.description).html('');
+            })
+            .selectAll('tr')
             .data(data)
             .on('click', function (d) {
                 self.rowSelect(d, this);
+            })
+            .on('mouseover', function (d) {
+                d3.select(self.description).html(self.getRowName(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;
@@ -113,6 +120,9 @@ Table.prototype.redrawRows = function () {
         var cells_in_new_rows = rows.enter().append('tr')
             .on('click', function (d) {
                 self.rowSelect(d, this);
+            })
+            .on('mouseover', function (d) {
+                d3.select(self.description).html(self.getRowName(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;

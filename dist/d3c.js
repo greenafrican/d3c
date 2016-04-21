@@ -61,6 +61,7 @@ function Table(config) {
     config = config || {};
     this.bindto = ('bindto' in config) ? config.bindto : "#d3c-table";
     this.selected = ('selected' in config) ? config.selected : [];
+    this.description = ('description' in config) ? config.description : "#d3c-table-description";
 
     this.c3 = window.c3;
     this.chart(('chart' in config) ? config.chart : {data: {columns: []}});
@@ -75,8 +76,6 @@ function Table(config) {
     this.data(('data' in config) ? config.data : []);
     this.columns(('columns' in config) ? config.columns : []);
     this.sort(('sort' in config) ? config.sort : {});
-    this.allInstances = [];
-    this.allInstances.push(this);
 }
 
 Table.prototype.data = function (data) {
@@ -379,6 +378,7 @@ Table.prototype.rowSelect = function (row, selection) {
 
 };
 
+
 Table.prototype.sort = function (sort) {
     var data = this.data();
     if (data.length < 2 && arguments.length === 0) return this._sort || {};
@@ -515,10 +515,17 @@ Table.prototype.redrawRows = function () {
     var data = this.data();
 
     if (data.length > 0) {
-        var rows = this.selectTable.select('tbody').selectAll('tr')
+        var rows = this.selectTable.select('tbody')
+            .on('mouseout', function (d) {
+                d3.select(self.description).html('');
+            })
+            .selectAll('tr')
             .data(data)
             .on('click', function (d) {
                 self.rowSelect(d, this);
+            })
+            .on('mouseover', function (d) {
+                d3.select(self.description).html(self.getRowName(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;
@@ -552,6 +559,9 @@ Table.prototype.redrawRows = function () {
         var cells_in_new_rows = rows.enter().append('tr')
             .on('click', function (d) {
                 self.rowSelect(d, this);
+            })
+            .on('mouseover', function (d) {
+                d3.select(self.description).html(self.getRowName(d));
             })
             .classed('d3c-table-row-active', function (d) {
                 return self.selected.indexOf(self.getRowName(d)) !== -1;

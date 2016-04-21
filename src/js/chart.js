@@ -89,3 +89,4 @@ Table.prototype.rowSelect = function (row, selection) {
     self.chartUpdate();
 
 };
+
