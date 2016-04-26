@@ -279,15 +279,6 @@
         config || ( config = {} );
         this.chartConfig( config );
         this._chart = this.c3.generate( this.chartConfig() ); // TODO: update if exists
-        if ( typeof this.selectTable !== 'undefined' ) {
-            this._tableWidth = ( typeof this.selectTable.node() === 'undefined' ) ? 100 : this.selectTable.node().getBoundingClientRect().width;
-            this._tableHeight = ( typeof this.selectTable.node() === 'undefined' ) ? 100 : this.selectTable.node().getBoundingClientRect().height;
-            console.log( this._tableWidth, this._tableHeight );
-            this._chart.resize( {
-                width: this._tableWidth,
-                height: (this._tableHeight > 120) ? this._tableHeight : 120
-            } );
-        }
         return this._chart;
     };
     Table.prototype.chartConfig = function( config ) {
