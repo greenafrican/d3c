@@ -42,12 +42,10 @@
             return obj.key === 'name';
         } );
         var name = ( nameCell.length === 1 ) ? nameCell[0].value : 'y';
-
         var seriesCell = row.filter( function( obj ) {
             return obj.key === 'series';
         } );
         var series = ( seriesCell.length === 1 ) ? seriesCell[0].value : [];
-
         var values = series.map( function( d ) {
             return d[name];
         } );
@@ -72,9 +70,13 @@
                 chart.show( self.selected, { withLegend: true } );
             }
         } );
-        d3.select( selection ).classed( 'd3c-table-row-active', function() {
-            return self.selected.indexOf( name ) !== -1;
-        } );
         self.chartUpdate();
+        d3.select( selection ).style( 'background-color', function() {
+            if ( self.selected.indexOf( name ) !== -1 ) {
+                var rgb = d3.rgb( self.chart().data.colors()[ name ] );
+                return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0.1)';
+            }
+            return '#fff';
+        } );
     };
 

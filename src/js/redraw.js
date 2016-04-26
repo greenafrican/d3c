@@ -102,8 +102,13 @@
                 .on( 'mouseout', function() {
                     return tooltip.style( 'visibility', 'hidden' );
                 } )
-                .classed( 'd3c-table-row-active', function( d ) {
-                    return self.selected.indexOf( self.getRowName( d ) ) !== -1;
+                .style( 'background-color', function( d ) {
+                    var name = self.getRowName( d );
+                    if ( self.selected.indexOf( name ) !== -1 ) {
+                        var rgb = d3.rgb( self.chart().data.colors()[ name ] );
+                        return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0.1)';
+                    }
+                    return '#fff';
                 } );
             cells = rows.selectAll( 'td' ).data( function( d ) {
                 return $.grep( d, function( e ) {
@@ -150,8 +155,13 @@
                 .on( 'mouseout', function() {
                     return tooltip.style( 'visibility', 'hidden' );
                 } )
-                .classed( 'd3c-table-row-active', function( d ) {
-                    return self.selected.indexOf( self.getRowName( d ) ) !== -1;
+                .style( 'background-color', function( d ) {
+                    var name = self.getRowName( d );
+                    if ( self.selected.indexOf( name ) !== -1 ) {
+                        var rgb = d3.rgb( self.chart().data.colors()[ name ] );
+                        return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0.1)';
+                    }
+                    return '#fff';
                 } )
                 .selectAll( 'td' )
                 .data( function( d ) {
