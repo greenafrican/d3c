@@ -11,7 +11,7 @@
     var d3cTable, d3cChart;
     $(document).ready(function () {
         d3cTable = d3c.table({
-            description: "#d3c-table-description",
+            description: ".d3c-table-description",
             bindto: "#d3c-table",
             columns: [
                 {
@@ -147,7 +147,7 @@
     </div>
     <div class="row">
         <div class="twelve columns">
-            <div id="d3c-table-description"></div>
+            <div class="d3c-table-description"></div>
         </div>
     </div>
 </div>
@@ -192,6 +192,13 @@
 
     .d3c-table-row-active {
         background-color: #e5f5fb;
+    }
+
+    .d3c-table-descr {
+        padding: 8px;
+        background-color: #fff;
+        border-radius: 3px;
+        border: 1px solid #999;
     }
 
 </style>
