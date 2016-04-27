@@ -4,6 +4,16 @@
 		this.selected = ( 'selected' in config ) ? config.selected : [];
 		this.description = ( 'description' in config ) ? config.description : '#d3c-table-description';
 
+		if ( 'responsive' in config ) {
+			if ( 'enabled' in config.responsive && 'threshold' in config.responsive ) {
+				this.responsive = config.responsive.enabled || false;
+				this._tableWidthMax = config.responsive.threshold || 0;
+			}
+		} else {
+			this.responsive = false;
+			this._tableWidthMax = 0;
+		}
+
 		this.c3 = window.c3;
 		this.chart( ( 'chart' in config ) ? config.chart : { data: { columns: [] } } );
 
@@ -150,6 +160,17 @@
 						row.splice( i, 0, { key: col.key, value: '-' } );
 					}
 				} );
+				if ( self.responsive ) {
+					if ( self._tableWidthMax > self._tableWidth ) {
+						if ( col.bump === true ) {
+							col.hide = true;
+						} else {
+							col.hide = false;
+						}
+					} else {
+						col.hide = false;
+					}
+				}
 			} );
 
 			data.forEach( function( row ) {
@@ -158,6 +179,7 @@
 						return e.key === cell.key;
 					} );
 					cell.config = $.extend( true, {}, columnConfig[ 0 ] ) || {};
+					cell.hide = ( 'hide' in cell.config ) ? cell.config.hide : false;
 					cell.config.match = $.isEmptyObject( columnConfig[ 0 ] ) ? false : true;
 					if ( 'chart' in cell.config && ( cell.config.type === 'chart-bar' || cell.config.type === 'highlight' ) ) {
 						cell.x = cell.config.chart.x( cell.value ) || 0;

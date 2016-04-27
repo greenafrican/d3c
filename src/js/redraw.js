@@ -1,6 +1,8 @@
 /*eslint no-trailing-spaces:0*/
     Table.prototype.redrawHeader = function() {
-        var columns = this.columns();
+	    var columns = this.columns().filter( function( col ) {
+			return !col.hide;
+	    } );
         var self = this;
         var headerRows = this.selectTable.select( 'thead' ).selectAll( 'tr' );
         var headerCells = headerRows.selectAll( 'th' ).data( columns );
@@ -112,7 +114,7 @@
                 } );
             cells = rows.selectAll( 'td' ).data( function( d ) {
                 return $.grep( d, function( e ) {
-                    return e.config.match;
+                    return e.config.match && !e.hide;
                 } );
             } );
             cells.enter().append( 'td' )
@@ -199,8 +201,8 @@
                 x = dd.config.chart.x;
                 color = dd.config.chart.color;
                 width = dd.config.chart.width;
-
-                $$.select( 'svg' ).remove(); // TODO: work on transition ( super nice to have though )
+	            $$.select( 'div' ).remove();
+                $$.select( 'svg' ).remove();
 
                 svg = $$.append( 'svg' )
                     .attr( {
@@ -272,7 +274,8 @@
                         return '#000';
                     } );
             } else if ( dd.config.type === 'highlight' ) {
-                $$.select( 'div' ).remove(); // TODO: work on transition ( super nice to have though )
+                $$.select( 'div' ).remove();
+	            $$.select( 'svg' ).remove();
                 hcolor = dd.config.chart.color;
                 $$.append( 'div' )
                     .style( 'background-color', function( d ) {
@@ -288,6 +291,7 @@
                     } );
             } else if ( dd.config.type === 'chart-spark' ) {
                 width = dd.config.chart.width;
+	            $$.select( 'div' ).remove();
                 $$.select( 'svg' ).remove();
                 svgSpark = $$.append( 'svg' )
                     .attr( {
@@ -298,6 +302,7 @@
                     .attr( 'd', dd.config.chart.line( dd.config.chart.values ) )
                     .attr( 'stroke', 'black' ).attr( 'stroke-width', 0.5 ).attr( 'fill', 'none' );
             } else {
+	            $$.text( '' );
                 $$.text( function( d ) {
                     return formatText( d );
                 } );

@@ -58,6 +58,16 @@
 		this.selected = ( 'selected' in config ) ? config.selected : [];
 		this.description = ( 'description' in config ) ? config.description : '#d3c-table-description';
 
+		if ( 'responsive' in config ) {
+			if ( 'enabled' in config.responsive && 'threshold' in config.responsive ) {
+				this.responsive = config.responsive.enabled || false;
+				this._tableWidthMax = config.responsive.threshold || 0;
+			}
+		} else {
+			this.responsive = false;
+			this._tableWidthMax = 0;
+		}
+
 		this.c3 = window.c3;
 		this.chart( ( 'chart' in config ) ? config.chart : { data: { columns: [] } } );
 
@@ -204,6 +214,17 @@
 						row.splice( i, 0, { key: col.key, value: '-' } );
 					}
 				} );
+				if ( self.responsive ) {
+					if ( self._tableWidthMax > self._tableWidth ) {
+						if ( col.bump === true ) {
+							col.hide = true;
+						} else {
+							col.hide = false;
+						}
+					} else {
+						col.hide = false;
+					}
+				}
 			} );
 
 			data.forEach( function( row ) {
@@ -212,6 +233,7 @@
 						return e.key === cell.key;
 					} );
 					cell.config = $.extend( true, {}, columnConfig[ 0 ] ) || {};
+					cell.hide = ( 'hide' in cell.config ) ? cell.config.hide : false;
 					cell.config.match = $.isEmptyObject( columnConfig[ 0 ] ) ? false : true;
 					if ( 'chart' in cell.config && ( cell.config.type === 'chart-bar' || cell.config.type === 'highlight' ) ) {
 						cell.x = cell.config.chart.x( cell.value ) || 0;
@@ -413,7 +435,9 @@
 
 /*eslint no-trailing-spaces:0*/
     Table.prototype.redrawHeader = function() {
-        var columns = this.columns();
+	    var columns = this.columns().filter( function( col ) {
+			return !col.hide;
+	    } );
         var self = this;
         var headerRows = this.selectTable.select( 'thead' ).selectAll( 'tr' );
         var headerCells = headerRows.selectAll( 'th' ).data( columns );
@@ -525,7 +549,7 @@
                 } );
             cells = rows.selectAll( 'td' ).data( function( d ) {
                 return $.grep( d, function( e ) {
-                    return e.config.match;
+                    return e.config.match && !e.hide;
                 } );
             } );
             cells.enter().append( 'td' )
@@ -612,8 +636,8 @@
                 x = dd.config.chart.x;
                 color = dd.config.chart.color;
                 width = dd.config.chart.width;
-
-                $$.select( 'svg' ).remove(); // TODO: work on transition ( super nice to have though )
+	            $$.select( 'div' ).remove();
+                $$.select( 'svg' ).remove();
 
                 svg = $$.append( 'svg' )
                     .attr( {
@@ -685,7 +709,8 @@
                         return '#000';
                     } );
             } else if ( dd.config.type === 'highlight' ) {
-                $$.select( 'div' ).remove(); // TODO: work on transition ( super nice to have though )
+                $$.select( 'div' ).remove();
+	            $$.select( 'svg' ).remove();
                 hcolor = dd.config.chart.color;
                 $$.append( 'div' )
                     .style( 'background-color', function( d ) {
@@ -701,6 +726,7 @@
                     } );
             } else if ( dd.config.type === 'chart-spark' ) {
                 width = dd.config.chart.width;
+	            $$.select( 'div' ).remove();
                 $$.select( 'svg' ).remove();
                 svgSpark = $$.append( 'svg' )
                     .attr( {
@@ -711,6 +737,7 @@
                     .attr( 'd', dd.config.chart.line( dd.config.chart.values ) )
                     .attr( 'stroke', 'black' ).attr( 'stroke-width', 0.5 ).attr( 'fill', 'none' );
             } else {
+	            $$.text( '' );
                 $$.text( function( d ) {
                     return formatText( d );
                 } );

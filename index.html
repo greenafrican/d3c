@@ -13,13 +13,18 @@
         d3cTable = d3c.table({
             description: ".d3c-table-description",
             bindto: "#d3c-table",
+            responsive: {
+                enabled: true,
+                threshold: 600
+            },
             columns: [
                 {
                     title: "Name",
                     key: 'name',
                     width: "15%",
                     type: "cell",
-                    format: "text"
+                    format: "text",
+                    bump: false
                 },
                 {
                     title: "Latest",
@@ -27,6 +32,7 @@
                     width: "40%",
                     type: "chart-bar",
                     format: "number",
+                    bump: true,
                     chart: {
                         zeroBased: true,
                         colorFrom: "chart_change"
@@ -37,7 +43,8 @@
                     key: 'chart_change',
                     width: "10%",
                     type: "highlight",
-                    format: "percent"
+                    format: "percent",
+                    bump: false
                 },
                 {
                     title: "Spark",
@@ -45,6 +52,7 @@
                     width: "10%",
                     type: "chart-spark",
                     format: "number",
+                    bump: true,
                     chart: {
                         keys: {
                             x: 'date'
