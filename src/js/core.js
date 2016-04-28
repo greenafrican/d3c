@@ -54,6 +54,7 @@
 		var newRow = [], k;
 		for ( k in row ) {
 			if ( row.hasOwnProperty( k ) ) {
+				row[ k ] = tryConvertNum( row[ k ] );
 				newRow.push( {
 					key: k,
 					value: row[ k ]
@@ -162,7 +163,7 @@
 				} );
 				if ( self.responsive ) {
 					if ( self._tableWidthMax > self._tableWidth ) {
-						if ( col.bump === true ) {
+						if ( col.collapse === true ) {
 							col.hide = true;
 						} else {
 							col.hide = false;
@@ -195,11 +196,8 @@
 						seriesFrom = $.grep( row, function( e ) {
 							return e.key === 'series';
 						} );
-						nameFrom = $.grep( row, function( e ) {
-							return e.key === 'name';
-						} );
+						name = self.getRowName( row );
 						cell.config.chart.values = ( seriesFrom.length > 0 ) ? seriesFrom[ 0 ].value : [];
-						name = ( nameFrom.length > 0 ) ? nameFrom[ 0 ].value : '';
 						v = cell.config.chart.values.map( function( o ) {
 							return o[ name ];
 						} );

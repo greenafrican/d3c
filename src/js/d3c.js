@@ -45,6 +45,43 @@
         }
         return -1;
     };
+    function tryConvertNum( d ) {
+        if ( d instanceof Array ) {
+            d = convertArrNum( d );
+        } else if ( typeof d === 'object' ) {
+            d = convertObjNum( d );
+        } else if ( Number( d ) ) {
+            d = +d;
+        }
+        return d;
+    }
+    function convertArrNum( d ) {
+        d.forEach( function( dd, i ) {
+            if ( dd instanceof Array ) {
+                d[i] = convertArrNum( dd );
+            } else if ( typeof dd === 'object' ) {
+                d[i] = convertObjNum( dd );
+            } else if ( Number( dd ) ) {
+                d[i] = +dd;
+            }
+        } );
+        return d;
+    }
+    function convertObjNum( d ) {
+        var k;
+        for ( k in d ) {
+            if ( d.hasOwnProperty( k ) ) {
+                if ( d[ k ] instanceof Array ) {
+                    d[ k ] = convertArrNum( d[ k ] );
+                } else if ( typeof d[ k ] === 'object' ) {
+                    d[ k ] = convertObjNum( d[ k ] );
+                } else if ( Number( d[ k ] ) ) {
+                    d[ k ] = +d[ k ];
+                }
+            }
+        }
+        return d;
+    };
     function toggleArrayItem( a, v ) {
         var i = a.indexOf( v );
         if ( i === -1 )
@@ -108,6 +145,7 @@
 		var newRow = [], k;
 		for ( k in row ) {
 			if ( row.hasOwnProperty( k ) ) {
+				row[ k ] = tryConvertNum( row[ k ] );
 				newRow.push( {
 					key: k,
 					value: row[ k ]
@@ -216,7 +254,7 @@
 				} );
 				if ( self.responsive ) {
 					if ( self._tableWidthMax > self._tableWidth ) {
-						if ( col.bump === true ) {
+						if ( col.collapse === true ) {
 							col.hide = true;
 						} else {
 							col.hide = false;
@@ -249,11 +287,8 @@
 						seriesFrom = $.grep( row, function( e ) {
 							return e.key === 'series';
 						} );
-						nameFrom = $.grep( row, function( e ) {
-							return e.key === 'name';
-						} );
+						name = self.getRowName( row );
 						cell.config.chart.values = ( seriesFrom.length > 0 ) ? seriesFrom[ 0 ].value : [];
-						name = ( nameFrom.length > 0 ) ? nameFrom[ 0 ].value : '';
 						v = cell.config.chart.values.map( function( o ) {
 							return o[ name ];
 						} );
@@ -336,10 +371,7 @@
     };
     Table.prototype.getChartSeries = function( row ) {
         var x, xs;
-        var nameCell = row.filter( function( obj ) {
-            return obj.key === 'name';
-        } );
-        var name = ( nameCell.length === 1 ) ? nameCell[0].value : 'y';
+        var name = this.getRowName( row ) || 'y';
         var seriesCell = row.filter( function( obj ) {
             return obj.key === 'series';
         } );
@@ -370,8 +402,8 @@
         } );
         self.chartUpdate();
         d3.select( selection ).style( 'background-color', function() {
+            var rgb = d3.rgb( self.chart().data.colors()[ name ] );
             if ( self.selected.indexOf( name ) !== -1 ) {
-                var rgb = d3.rgb( self.chart().data.colors()[ name ] );
                 return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0.1)';
             }
             return '#fff';
@@ -435,9 +467,7 @@
 
 /*eslint no-trailing-spaces:0*/
     Table.prototype.redrawHeader = function() {
-	    var columns = this.columns().filter( function( col ) {
-			return !col.hide;
-	    } );
+	    var columns = this.columns().filter( function( col ) { return !col.hide; } );
         var self = this;
         var headerRows = this.selectTable.select( 'thead' ).selectAll( 'tr' );
         var headerCells = headerRows.selectAll( 'th' ).data( columns );
@@ -603,7 +633,7 @@
                 .selectAll( 'td' )
                 .data( function( d ) {
                     return $.grep( d, function( e ) {
-                        return e.config.match;
+                        return e.config.match && !e.hide;
                     } );
                 } );
 

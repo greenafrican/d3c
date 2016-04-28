@@ -41,6 +41,43 @@
         }
         return -1;
     };
+    function tryConvertNum( d ) {
+        if ( d instanceof Array ) {
+            d = convertArrNum( d );
+        } else if ( typeof d === 'object' ) {
+            d = convertObjNum( d );
+        } else if ( Number( d ) ) {
+            d = +d;
+        }
+        return d;
+    }
+    function convertArrNum( d ) {
+        d.forEach( function( dd, i ) {
+            if ( dd instanceof Array ) {
+                d[i] = convertArrNum( dd );
+            } else if ( typeof dd === 'object' ) {
+                d[i] = convertObjNum( dd );
+            } else if ( Number( dd ) ) {
+                d[i] = +dd;
+            }
+        } );
+        return d;
+    }
+    function convertObjNum( d ) {
+        var k;
+        for ( k in d ) {
+            if ( d.hasOwnProperty( k ) ) {
+                if ( d[ k ] instanceof Array ) {
+                    d[ k ] = convertArrNum( d[ k ] );
+                } else if ( typeof d[ k ] === 'object' ) {
+                    d[ k ] = convertObjNum( d[ k ] );
+                } else if ( Number( d[ k ] ) ) {
+                    d[ k ] = +d[ k ];
+                }
+            }
+        }
+        return d;
+    };
     function toggleArrayItem( a, v ) {
         var i = a.indexOf( v );
         if ( i === -1 )

@@ -1,8 +1,6 @@
 /*eslint no-trailing-spaces:0*/
     Table.prototype.redrawHeader = function() {
-	    var columns = this.columns().filter( function( col ) {
-			return !col.hide;
-	    } );
+	    var columns = this.columns().filter( function( col ) { return !col.hide; } );
         var self = this;
         var headerRows = this.selectTable.select( 'thead' ).selectAll( 'tr' );
         var headerCells = headerRows.selectAll( 'th' ).data( columns );
@@ -168,7 +166,7 @@
                 .selectAll( 'td' )
                 .data( function( d ) {
                     return $.grep( d, function( e ) {
-                        return e.config.match;
+                        return e.config.match && !e.hide;
                     } );
                 } );
 

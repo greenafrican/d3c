@@ -38,10 +38,7 @@
     };
     Table.prototype.getChartSeries = function( row ) {
         var x, xs;
-        var nameCell = row.filter( function( obj ) {
-            return obj.key === 'name';
-        } );
-        var name = ( nameCell.length === 1 ) ? nameCell[0].value : 'y';
+        var name = this.getRowName( row ) || 'y';
         var seriesCell = row.filter( function( obj ) {
             return obj.key === 'series';
         } );
@@ -72,8 +69,8 @@
         } );
         self.chartUpdate();
         d3.select( selection ).style( 'background-color', function() {
+            var rgb = d3.rgb( self.chart().data.colors()[ name ] );
             if ( self.selected.indexOf( name ) !== -1 ) {
-                var rgb = d3.rgb( self.chart().data.colors()[ name ] );
                 return 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0.1)';
             }
             return '#fff';
