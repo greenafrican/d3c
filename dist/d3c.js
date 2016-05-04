@@ -104,6 +104,7 @@
 			this.responsive = false;
 			this._tableWidthMax = 0;
 		}
+		this.colors = config.colors || [];
 
 		this.c3 = window.c3;
 		this.chart( ( 'chart' in config ) ? config.chart : { data: { columns: [] } } );
