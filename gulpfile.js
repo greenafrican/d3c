@@ -50,6 +50,3 @@ gulp.task('watchJs', function () {
 gulp.task('build', ['minifyScripts', 'compileSass']);
 
 gulp.task('default', ['build', 'watchJs']);
-
-
-

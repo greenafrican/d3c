@@ -1,4 +1,4 @@
 ( function( window ) {
     'use strict';
 
-    var d3c = { version: '0.0.1' };
+    var d3c = { version: '0.0.2' };
